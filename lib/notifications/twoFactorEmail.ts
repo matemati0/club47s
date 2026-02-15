@@ -47,6 +47,10 @@ export async function sendTwoFactorCodeEmail(input: SendTwoFactorCodeInput) {
   const from = process.env.RESEND_FROM_EMAIL;
 
   if (!apiKey || !from) {
+    console.warn("[2FA] Email delivery is missing Resend configuration", {
+      hasApiKey: Boolean(apiKey),
+      hasFrom: Boolean(from)
+    });
     return { sent: false as const, reason: "missing_config" as const };
   }
 
@@ -67,11 +71,17 @@ export async function sendTwoFactorCodeEmail(input: SendTwoFactorCodeInput) {
     });
 
     if (!response.ok) {
+      const responseBody = await response.text().catch(() => "");
+      console.error("[2FA] Resend rejected email send request", {
+        status: response.status,
+        responseBody: responseBody.slice(0, 800)
+      });
       return { sent: false as const, reason: "provider_error" as const };
     }
 
     return { sent: true as const };
   } catch {
+    console.error("[2FA] Network error while sending email via Resend");
     return { sent: false as const, reason: "network_error" as const };
   }
 }
