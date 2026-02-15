@@ -1,0 +1,9 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360" viewBox="0 0 360 360" role="img" aria-labelledby="title desc">
+  <title id="title">Club Product</title>
+  <desc id="desc">Default product image placeholder</desc>
+  <rect width="360" height="360" fill="#050505"/>
+  <rect x="18" y="18" width="324" height="324" fill="#000000" stroke="#2E2E2E" stroke-width="2"/>
+  <rect x="44" y="44" width="272" height="272" fill="none" stroke="#2E2E2E" stroke-width="1"/>
+  <text x="180" y="168" text-anchor="middle" fill="#FFFFFF" font-size="26" font-family="Assistant, Heebo, Inter, Arial, sans-serif" letter-spacing="6">CLUB 47</text>
+  <text x="180" y="204" text-anchor="middle" fill="#BDBDBD" font-size="14" font-family="Assistant, Heebo, Inter, Arial, sans-serif" letter-spacing="4">PRODUCT</text>
+</svg>

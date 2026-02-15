@@ -1,0 +1,21 @@
+const { spawn } = require("node:child_process");
+
+const child = spawn(
+  process.execPath,
+  ["./node_modules/next/dist/bin/next", "start", "-p", "3000"],
+  {
+    stdio: "inherit",
+    env: {
+      ...process.env,
+      ALLOW_DEBUG_2FA: "true"
+    }
+  }
+);
+
+child.on("exit", (code, signal) => {
+  if (signal) {
+    process.kill(process.pid, signal);
+    return;
+  }
+  process.exit(code ?? 1);
+});

@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root,
+  html[data-theme="dark"] {
+    --club-black: 0 0 0;
+    --club-white: 255 255 255;
+    --club-dark-gray: 46 46 46;
+    --club-light-gray: 189 189 189;
+    --club-panel: 5 5 5;
+    --club-card: 0 0 0;
+    --club-field: 4 4 4;
+    --club-shadow-rgb: 0 0 0;
+  }
+
+  html[data-theme="light"] {
+    --club-black: 255 255 255;
+    --club-white: 0 0 0;
+    --club-dark-gray: 189 189 189;
+    --club-light-gray: 46 46 46;
+    --club-panel: 247 247 247;
+    --club-card: 255 255 255;
+    --club-field: 250 250 250;
+    --club-shadow-rgb: 15 15 15;
+  }
+
+  html[data-theme="purple"] {
+    --club-black: 14 10 22;
+    --club-white: 239 232 255;
+    --club-dark-gray: 87 71 116;
+    --club-light-gray: 178 161 209;
+    --club-panel: 23 16 36;
+    --club-card: 19 12 30;
+    --club-field: 28 20 43;
+    --club-shadow-rgb: 9 4 17;
+  }
+
+  * {
+    border-color: rgb(var(--club-dark-gray));
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+    background-color: rgb(var(--club-black));
+    color: rgb(var(--club-white));
+  }
+
+  body {
+    letter-spacing: 0.01em;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+    background-color: rgb(var(--club-black));
+    transition:
+      background-color 260ms ease,
+      color 260ms ease;
+  }
+
+  ::selection {
+    background-color: rgb(var(--club-white));
+    color: rgb(var(--club-black));
+  }
+
+  a,
+  button,
+  select,
+  input {
+    transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+    transition-duration: 220ms;
+    transition-timing-function: ease;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  select:focus-visible,
+  input:focus-visible {
+    outline: 1px solid rgb(var(--club-light-gray));
+    outline-offset: 2px;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px rgb(var(--club-field)) inset !important;
+    -webkit-text-fill-color: rgb(var(--club-white)) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+@layer components {
+  .club-shell {
+    @apply mx-auto w-full max-w-6xl px-6;
+  }
+
+  .club-panel {
+    @apply rounded-2xl border border-club-darkGray bg-club-panel;
+    box-shadow:
+      inset 0 1px 0 rgb(var(--club-white) / 0.08),
+      0 26px 56px rgb(var(--club-shadow-rgb) / 0.3);
+  }
+
+  .club-card {
+    @apply rounded-xl border border-club-darkGray bg-club-card;
+    box-shadow:
+      inset 0 1px 0 rgb(var(--club-white) / 0.06),
+      0 10px 28px rgb(var(--club-shadow-rgb) / 0.22);
+  }
+
+  .club-kicker {
+    @apply text-[11px] tracking-[0.32em] text-club-lightGray;
+  }
+
+  .club-title {
+    @apply text-3xl font-medium tracking-tight text-club-white sm:text-4xl;
+  }
+
+  .club-subtitle {
+    @apply text-base leading-relaxed text-club-lightGray;
+  }
+
+  .club-field {
+    @apply h-12 w-full rounded-lg border border-club-darkGray bg-club-field px-4 text-right text-base text-club-white placeholder:text-club-lightGray;
+    box-shadow: inset 0 1px 0 rgb(var(--club-white) / 0.06);
+  }
+
+  .club-field:focus {
+    @apply border-club-white outline-none;
+  }
+
+  .club-select {
+    @apply h-11 rounded-lg border border-club-darkGray bg-club-field px-3 text-sm text-club-white;
+    box-shadow: inset 0 1px 0 rgb(var(--club-white) / 0.06);
+  }
+
+  .club-select:focus {
+    @apply border-club-white outline-none;
+  }
+
+  .club-btn-primary {
+    @apply flex h-11 items-center justify-center rounded-lg border border-club-white bg-club-white px-5 text-sm font-medium text-club-black;
+  }
+
+  .club-btn-primary:hover {
+    @apply opacity-85;
+  }
+
+  .club-btn-secondary {
+    @apply flex h-11 items-center justify-center rounded-lg border border-club-darkGray px-5 text-sm text-club-white;
+    box-shadow: inset 0 1px 0 rgb(var(--club-white) / 0.05);
+  }
+
+  .club-btn-secondary:hover {
+    @apply border-club-white;
+  }
+}
+
+@layer utilities {
+  .animate-fade {
+    animation: fadeIn 350ms ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
