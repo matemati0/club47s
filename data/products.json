@@ -1,0 +1,178 @@
+[
+  {
+    "id": "drops-women",
+    "section": "מוצרים לנשים",
+    "name": "טיפות לאישה",
+    "details": [
+      "טיפות טבעיות המבוססות על רכיבים מעוררי חשק, מגבירות רגישות, זרימת דם ותחושת עוררות.",
+      "מתאימות לחוויה עמוקה, ממושכת ומהנה יותר."
+    ],
+    "options": [{ "label": "מעל 10 שימושים", "price": 250 }],
+    "imageSrc": "/products/default-product.svg",
+    "imageAlt": "טיפות לאישה",
+    "stock": 44,
+    "status": "active",
+    "updatedAt": "2026-02-12T00:00:00.000Z"
+  },
+  {
+    "id": "cream-women",
+    "section": "מוצרים לנשים",
+    "name": "קרם לאישה",
+    "details": [
+      "קרם עשיר בלחות וחומרים פעילים.",
+      "משפר זרימת דם באזור האינטימי ומגביר תחושת חום, רגישות ועונג טבעי."
+    ],
+    "options": [{ "label": "יחידה", "price": 240 }],
+    "imageSrc": "/products/default-product.svg",
+    "imageAlt": "קרם לאישה",
+    "stock": 29,
+    "status": "active",
+    "updatedAt": "2026-02-12T00:00:00.000Z"
+  },
+  {
+    "id": "cialis",
+    "section": "מוצרים לגברים – טבליות וכדורים",
+    "name": "סיאליס (Tadalafil)",
+    "details": [
+      "השפעה ארוכת טווח עד 36 שעות.",
+      "מסייע לשמירה על זקפה יציבה לאורך זמן עם גמישות מלאה וללא לחץ של תזמון."
+    ],
+    "options": [
+      { "label": "10 כדורים", "price": 200 },
+      { "label": "20 כדורים", "price": 300 },
+      { "label": "40 כדורים", "price": 500 }
+    ],
+    "imageSrc": "/products/default-product.svg",
+    "imageAlt": "סיאליס",
+    "stock": 74,
+    "status": "active",
+    "updatedAt": "2026-02-12T00:00:00.000Z"
+  },
+  {
+    "id": "cenforce-100",
+    "section": "מוצרים לגברים – טבליות וכדורים",
+    "name": "סנפורס (Cenforce 100)",
+    "details": ["מינון קלאסי ויעיל.", "מתאים לשימוש קבוע ומסייע להשגת זקפה חזקה ומהירה."],
+    "options": [
+      { "label": "10 כדורים", "price": 200 },
+      { "label": "20 כדורים", "price": 350 },
+      { "label": "40 כדורים", "price": 580 }
+    ],
+    "imageSrc": "/products/cenforce-100.jpg",
+    "imageAlt": "אריזת סנפורס 100",
+    "stock": 65,
+    "status": "active",
+    "updatedAt": "2026-02-11T00:00:00.000Z"
+  },
+  {
+    "id": "cenforce-150",
+    "section": "מוצרים לגברים – טבליות וכדורים",
+    "name": "סנפורס (Cenforce 150)",
+    "details": ["גרסה מחוזקת למי שמחפש אפקט חזק יותר, עמידות גבוהה וביצועים משופרים."],
+    "options": [
+      { "label": "10 כדורים", "price": 220 },
+      { "label": "20 כדורים", "price": 370 },
+      { "label": "40 כדורים", "price": 600 }
+    ],
+    "imageSrc": "/products/cenforce-150.jpg",
+    "imageAlt": "אריזת סנפורס 150",
+    "stock": 48,
+    "status": "active",
+    "updatedAt": "2026-02-11T00:00:00.000Z"
+  },
+  {
+    "id": "cenforce-200",
+    "section": "מוצרים לגברים – טבליות וכדורים",
+    "name": "סנפורס (Cenforce 200) – מבצע",
+    "details": ["המינון החזק ביותר. מיועד למי שזקוק לעוצמה מקסימלית ולביטחון מלא לאורך זמן."],
+    "options": [
+      { "label": "10 כדורים", "price": 300 },
+      { "label": "20 כדורים", "price": 500 },
+      { "label": "40 כדורים", "price": 600 }
+    ],
+    "imageSrc": "/products/cenforce-200.jpg",
+    "imageAlt": "אריזת סנפורס 200",
+    "stock": 37,
+    "status": "active",
+    "updatedAt": "2026-02-10T00:00:00.000Z"
+  },
+  {
+    "id": "fildena",
+    "section": "מוצרים לגברים – טבליות וכדורים",
+    "name": "פילנדה (Fildena 100 / 150 מ\"ג)",
+    "details": ["איכות גבוהה, השפעה יציבה ואמינה. שילוב של חוזק, סיבולת ושליטה טובה לאורך האקט."],
+    "options": [
+      { "label": "10 כדורים", "price": 250 },
+      { "label": "20 כדורים", "price": 450 },
+      { "label": "40 כדורים", "price": 700 }
+    ],
+    "imageSrc": "/products/default-product.svg",
+    "imageAlt": "פילנדה",
+    "stock": 31,
+    "status": "active",
+    "updatedAt": "2026-02-09T00:00:00.000Z"
+  },
+  {
+    "id": "kamagra-jelly",
+    "section": "מוצרים לגברים – ג'לי ומדבקות",
+    "name": "Kamagra Oral Jelly",
+    "details": ["ג'לי בטעמים נעימים, נספג מהר בגוף ופועל תוך זמן קצר.", "מתאים למי שמעדיף פתרון מהיר."],
+    "options": [
+      { "label": "7 יחידות", "price": 170 },
+      { "label": "21 יחידות", "price": 280 },
+      { "label": "35 יחידות", "price": 650 }
+    ],
+    "imageSrc": "/products/default-product.svg",
+    "imageAlt": "Kamagra Oral Jelly",
+    "stock": 26,
+    "status": "active",
+    "updatedAt": "2026-02-09T00:00:00.000Z"
+  },
+  {
+    "id": "oral-strips",
+    "section": "מוצרים לגברים – ג'לי ומדבקות",
+    "name": "Oral Strips – מדבקות ללשון",
+    "details": ["מדבקות דקות הנמסות על הלשון, נספגות מיידית וללא צורך במים.", "מתאימות לשימוש דיסקרטי ומהיר."],
+    "options": [
+      { "label": "10 יחידות", "price": 340 },
+      { "label": "20 יחידות", "price": 600 },
+      { "label": "40 יחידות", "price": 900 }
+    ],
+    "imageSrc": "/products/default-product.svg",
+    "imageAlt": "Oral Strips",
+    "stock": 22,
+    "status": "active",
+    "updatedAt": "2026-02-09T00:00:00.000Z"
+  },
+  {
+    "id": "turkish-honey",
+    "section": "מוצרים לגברים – ג'לי ומדבקות",
+    "name": "דבש טורקי איכותי (275 מ\"ל)",
+    "details": ["תוסף טבעי מסורתי המבוסס על דבש וצמחי מרפא, מסייע להעלאת אנרגיה, חשק וחיוניות כללית."],
+    "options": [
+      { "label": "יחידה", "price": 250 },
+      { "label": "3 יחידות", "price": 600 }
+    ],
+    "imageSrc": "/products/default-product.svg",
+    "imageAlt": "דבש טורקי",
+    "stock": 18,
+    "status": "active",
+    "updatedAt": "2026-02-08T00:00:00.000Z"
+  },
+  {
+    "id": "aphrodite-chocolate",
+    "section": "מוצרים משותפים – לגברים ולנשים",
+    "name": "Aphrodite Chocolate",
+    "details": ["שוקולד איכותי עם רכיבים מעוררי מצב רוח וחשק.", "מושלם כהקדמה לערב רומנטי, מפנק, טעים ודיסקרטי."],
+    "options": [
+      { "label": "12 פרלינים", "price": 300 },
+      { "label": "24 פרלינים", "price": 500 }
+    ],
+    "imageSrc": "/products/default-product.svg",
+    "imageAlt": "Aphrodite Chocolate",
+    "stock": 19,
+    "status": "active",
+    "updatedAt": "2026-02-08T00:00:00.000Z"
+  }
+]
+

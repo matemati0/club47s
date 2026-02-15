@@ -2,21 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-
-type ProductOption = {
-  label: string;
-  price: number;
-};
-
-type StoreProduct = {
-  id: string;
-  section: string;
-  name: string;
-  details: string[];
-  options: ProductOption[];
-  imageSrc?: string;
-  imageAlt?: string;
-};
+import seedProducts from "@/data/products.json";
+import type { Product } from "@/lib/products/types";
 
 type CartItem = {
   key: string;
@@ -53,150 +40,7 @@ const memberUpdates = [
   "ביום שלישי תפורסם רשימת האמנים המעודכנת לחברי המועדון."
 ];
 
-const products: StoreProduct[] = [
-  {
-    id: "drops-women",
-    section: "מוצרים לנשים",
-    name: "טיפות לאישה",
-    details: [
-      "טיפות טבעיות המבוססות על רכיבים מעוררי חשק, מגבירות רגישות, זרימת דם ותחושת עוררות.",
-      "מתאימות לחוויה עמוקה, ממושכת ומהנה יותר."
-    ],
-    imageSrc: DEFAULT_PRODUCT_IMAGE,
-    imageAlt: "טיפות לאישה",
-    options: [{ label: "מעל 10 שימושים", price: 250 }]
-  },
-  {
-    id: "cream-women",
-    section: "מוצרים לנשים",
-    name: "קרם לאישה",
-    details: [
-      "קרם עשיר בלחות וחומרים פעילים.",
-      "משפר זרימת דם באזור האינטימי ומגביר תחושת חום, רגישות ועונג טבעי."
-    ],
-    imageSrc: DEFAULT_PRODUCT_IMAGE,
-    imageAlt: "קרם לאישה",
-    options: [{ label: "יחידה", price: 240 }]
-  },
-  {
-    id: "cialis",
-    section: "מוצרים לגברים – טבליות וכדורים",
-    name: "סיאליס (Tadalafil)",
-    details: [
-      "השפעה ארוכת טווח עד 36 שעות.",
-      "מסייע לשמירה על זקפה יציבה לאורך זמן עם גמישות מלאה וללא לחץ של תזמון."
-    ],
-    imageSrc: DEFAULT_PRODUCT_IMAGE,
-    imageAlt: "סיאליס",
-    options: [
-      { label: "10 כדורים", price: 200 },
-      { label: "20 כדורים", price: 300 },
-      { label: "40 כדורים", price: 500 }
-    ]
-  },
-  {
-    id: "cenforce-100",
-    section: "מוצרים לגברים – טבליות וכדורים",
-    name: "סנפורס (Cenforce 100)",
-    details: ["מינון קלאסי ויעיל.", "מתאים לשימוש קבוע ומסייע להשגת זקפה חזקה ומהירה."],
-    imageSrc: "/products/cenforce-100.jpg",
-    imageAlt: "אריזת סנפורס 100",
-    options: [
-      { label: "10 כדורים", price: 200 },
-      { label: "20 כדורים", price: 350 },
-      { label: "40 כדורים", price: 580 }
-    ]
-  },
-  {
-    id: "cenforce-150",
-    section: "מוצרים לגברים – טבליות וכדורים",
-    name: "סנפורס (Cenforce 150)",
-    details: ["גרסה מחוזקת למי שמחפש אפקט חזק יותר, עמידות גבוהה וביצועים משופרים."],
-    imageSrc: "/products/cenforce-150.jpg",
-    imageAlt: "אריזת סנפורס 150",
-    options: [
-      { label: "10 כדורים", price: 220 },
-      { label: "20 כדורים", price: 370 },
-      { label: "40 כדורים", price: 600 }
-    ]
-  },
-  {
-    id: "cenforce-200",
-    section: "מוצרים לגברים – טבליות וכדורים",
-    name: "סנפורס (Cenforce 200) – מבצע",
-    details: ["המינון החזק ביותר. מיועד למי שזקוק לעוצמה מקסימלית ולביטחון מלא לאורך זמן."],
-    imageSrc: "/products/cenforce-200.jpg",
-    imageAlt: "אריזת סנפורס 200",
-    options: [
-      { label: "10 כדורים", price: 300 },
-      { label: "20 כדורים", price: 500 },
-      { label: "40 כדורים", price: 600 }
-    ]
-  },
-  {
-    id: "fildena",
-    section: "מוצרים לגברים – טבליות וכדורים",
-    name: "פילנדה (Fildena 100 / 150 מ\"ג)",
-    details: ["איכות גבוהה, השפעה יציבה ואמינה. שילוב של חוזק, סיבולת ושליטה טובה לאורך האקט."],
-    imageSrc: DEFAULT_PRODUCT_IMAGE,
-    imageAlt: "פילנדה",
-    options: [
-      { label: "10 כדורים", price: 250 },
-      { label: "20 כדורים", price: 450 },
-      { label: "40 כדורים", price: 700 }
-    ]
-  },
-  {
-    id: "kamagra-jelly",
-    section: "מוצרים לגברים – ג'לי ומדבקות",
-    name: "Kamagra Oral Jelly",
-    details: ["ג'לי בטעמים נעימים, נספג מהר בגוף ופועל תוך זמן קצר.", "מתאים למי שמעדיף פתרון מהיר."],
-    imageSrc: DEFAULT_PRODUCT_IMAGE,
-    imageAlt: "Kamagra Oral Jelly",
-    options: [
-      { label: "7 יחידות", price: 170 },
-      { label: "21 יחידות", price: 280 },
-      { label: "35 יחידות", price: 650 }
-    ]
-  },
-  {
-    id: "oral-strips",
-    section: "מוצרים לגברים – ג'לי ומדבקות",
-    name: "Oral Strips – מדבקות ללשון",
-    details: ["מדבקות דקות הנמסות על הלשון, נספגות מיידית וללא צורך במים.", "מתאימות לשימוש דיסקרטי ומהיר."],
-    imageSrc: DEFAULT_PRODUCT_IMAGE,
-    imageAlt: "Oral Strips",
-    options: [
-      { label: "10 יחידות", price: 340 },
-      { label: "20 יחידות", price: 600 },
-      { label: "40 יחידות", price: 900 }
-    ]
-  },
-  {
-    id: "turkish-honey",
-    section: "מוצרים לגברים – ג'לי ומדבקות",
-    name: "דבש טורקי איכותי (275 מ\"ל)",
-    details: ["תוסף טבעי מסורתי המבוסס על דבש וצמחי מרפא, מסייע להעלאת אנרגיה, חשק וחיוניות כללית."],
-    imageSrc: DEFAULT_PRODUCT_IMAGE,
-    imageAlt: "דבש טורקי",
-    options: [
-      { label: "יחידה", price: 250 },
-      { label: "3 יחידות", price: 600 }
-    ]
-  },
-  {
-    id: "aphrodite-chocolate",
-    section: "מוצרים משותפים – לגברים ולנשים",
-    name: "Aphrodite Chocolate",
-    details: ["שוקולד איכותי עם רכיבים מעוררי מצב רוח וחשק.", "מושלם כהקדמה לערב רומנטי, מפנק, טעים ודיסקרטי."],
-    imageSrc: DEFAULT_PRODUCT_IMAGE,
-    imageAlt: "Aphrodite Chocolate",
-    options: [
-      { label: "12 פרלינים", price: 300 },
-      { label: "24 פרלינים", price: 500 }
-    ]
-  }
-];
+const fallbackProducts = seedProducts as Product[];
 
 const sectionsOrder = [
   "מוצרים לנשים",
@@ -258,15 +102,53 @@ function getStoreCopy(mode: StoreMode) {
 
 function StoreCatalog({ mode }: { mode: StoreMode }) {
   const copy = getStoreCopy(mode);
+  const [products, setProducts] = useState<Product[]>(fallbackProducts);
 
-  const groupedProducts = useMemo(
-    () =>
-      sectionsOrder.map((sectionTitle) => ({
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const response = await fetch("/api/products", { cache: "no-store" });
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = (await response.json().catch(() => null)) as
+          | { products?: Product[] }
+          | null;
+
+        if (!cancelled && Array.isArray(payload?.products)) {
+          setProducts(payload.products);
+        }
+      } catch {
+        // Keep fallback catalog.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const groupedProducts = useMemo(() => {
+    const availableSections = Array.from(new Set(products.map((product) => product.section)));
+    const extraSections = availableSections.filter(
+      (section) => !sectionsOrder.includes(section)
+    );
+
+    const orderedSections = [
+      ...sectionsOrder,
+      ...extraSections.sort((a, b) => a.localeCompare(b, "he-IL"))
+    ];
+
+    return orderedSections
+      .map((sectionTitle) => ({
         title: sectionTitle,
         products: products.filter((product) => product.section === sectionTitle)
-      })),
-    []
-  );
+      }))
+      .filter((section) => section.products.length > 0);
+  }, [products]);
 
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<Record<string, number>>({});
   const [selectedQuantity, setSelectedQuantity] = useState<Record<string, number>>({});
@@ -312,7 +194,7 @@ function StoreCatalog({ mode }: { mode: StoreMode }) {
     };
   }, [isCartOpen]);
 
-  const handleAddToCart = (product: StoreProduct) => {
+  const handleAddToCart = (product: Product) => {
     const optionIndex = selectedOptionIndex[product.id] ?? 0;
     const quantity = selectedQuantity[product.id] ?? 1;
     const selectedOption = product.options[optionIndex];

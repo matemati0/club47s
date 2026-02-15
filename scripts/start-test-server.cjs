@@ -7,7 +7,9 @@ const child = spawn(
     stdio: "inherit",
     env: {
       ...process.env,
-      ALLOW_DEBUG_2FA: "true"
+      ALLOW_DEBUG_2FA: "true",
+      DISABLE_EMAIL_DELIVERY: "true",
+      AUTH_COOKIE_SECRET: process.env.AUTH_COOKIE_SECRET || "e2e-secret"
     }
   }
 );

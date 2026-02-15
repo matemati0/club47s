@@ -15,8 +15,8 @@ function applySecurityHeaders(response: NextResponse) {
   return response;
 }
 
-export function middleware(request: NextRequest) {
-  const mode = resolveAuthMode(request.cookies.get(AUTH_COOKIE_NAME)?.value);
+export async function middleware(request: NextRequest) {
+  const mode = await resolveAuthMode(request.cookies.get(AUTH_COOKIE_NAME)?.value);
   const { pathname } = request.nextUrl;
 
   if (pathname === "/") {

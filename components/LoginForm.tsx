@@ -327,7 +327,7 @@ export function LoginForm() {
       <button
         type="button"
         onClick={handleAnonymousAccess}
-        className="mt-4 w-full text-center text-sm text-club-lightGray hover:text-club-white"
+        className="club-btn-secondary mt-4 h-12 w-full text-base text-club-lightGray hover:text-club-white"
       >
         המשך כאנונימי
       </button>

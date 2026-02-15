@@ -17,13 +17,13 @@ export const metadata: Metadata = {
   description: "אזור פרטי לחברי המועדון"
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const cookieStore = cookies();
-  const initialMode = resolveAuthMode(cookieStore.get(AUTH_COOKIE_NAME)?.value);
+  const initialMode = await resolveAuthMode(cookieStore.get(AUTH_COOKIE_NAME)?.value);
 
   return (
     <html lang="he" dir="rtl" data-theme="dark" suppressHydrationWarning>

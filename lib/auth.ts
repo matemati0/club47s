@@ -1,3 +1,5 @@
+import { signJson, verifyJson } from "@/lib/security/signedToken";
+
 export type AuthMode = "guest" | "anonymous" | "member" | "admin";
 export type SocialProvider = "google" | "facebook";
 export type TwoFactorTargetMode = "member" | "admin";
@@ -5,13 +7,6 @@ export type TwoFactorTargetMode = "member" | "admin";
 export type RegisteredMemberCredentials = {
   email: string;
   password: string;
-};
-
-export type TwoFactorChallenge = {
-  email: string;
-  code: string;
-  expiresAt: number;
-  targetMode: TwoFactorTargetMode;
 };
 
 export const AUTH_COOKIE_NAME = "club-auth-mode";
@@ -28,16 +23,72 @@ function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
-function resolveTwoFactorTargetMode(value?: string | null): TwoFactorTargetMode {
-  if (value === "admin") {
-    return "admin";
+type SessionMode = Exclude<AuthMode, "guest">;
+type AuthTokenPayload = {
+  v: 1;
+  mode: SessionMode;
+  iat: number;
+  exp: number;
+};
+
+function resolveAuthCookieSecret() {
+  const configured = process.env.AUTH_COOKIE_SECRET?.trim();
+  if (configured) {
+    return configured;
   }
-  return "member";
+
+  if (process.env.NODE_ENV !== "production") {
+    return "dev-only-secret-change-me";
+  }
+
+  return "";
 }
 
-export function resolveAuthMode(value?: string | null): AuthMode {
-  if (value === "member" || value === "anonymous" || value === "admin") {
-    return value;
+export async function createAuthToken(mode: SessionMode) {
+  const secret = resolveAuthCookieSecret();
+  if (!secret) {
+    throw new Error("Missing AUTH_COOKIE_SECRET");
+  }
+
+  const iat = Math.floor(Date.now() / 1000);
+  const exp = iat + AUTH_COOKIE_MAX_AGE;
+
+  return signJson<AuthTokenPayload>(
+    {
+      v: 1,
+      mode,
+      iat,
+      exp
+    },
+    secret
+  );
+}
+
+export async function resolveAuthMode(value?: string | null): Promise<AuthMode> {
+  if (!value) {
+    return "guest";
+  }
+
+  const secret = resolveAuthCookieSecret();
+  if (!secret) {
+    return "guest";
+  }
+
+  const payload = await verifyJson<AuthTokenPayload>(value, secret);
+  if (!payload || payload.v !== 1) {
+    return "guest";
+  }
+
+  if (
+    typeof payload.exp !== "number" ||
+    !Number.isFinite(payload.exp) ||
+    payload.exp <= Math.floor(Date.now() / 1000)
+  ) {
+    return "guest";
+  }
+
+  if (payload.mode === "member" || payload.mode === "anonymous" || payload.mode === "admin") {
+    return payload.mode;
   }
 
   return "guest";
@@ -74,7 +125,7 @@ export function getTwoFactorCookieOptions() {
 }
 
 export function shouldExposeDebugTwoFactorCode() {
-  return process.env.ALLOW_DEBUG_2FA === "true" || process.env.NODE_ENV !== "production";
+  return process.env.ALLOW_DEBUG_2FA === "true";
 }
 
 export function serializeRegisteredMemberCredentials(
@@ -115,54 +166,15 @@ export function parseRegisteredMemberCredentials(
   }
 }
 
-export function serializeTwoFactorChallenge(challenge: TwoFactorChallenge) {
-  return encodeURIComponent(
-    JSON.stringify({
-      email: normalizeEmail(challenge.email),
-      code: challenge.code,
-      expiresAt: challenge.expiresAt,
-      targetMode: challenge.targetMode
-    })
-  );
-}
-
-export function parseTwoFactorChallenge(value?: string | null): TwoFactorChallenge | null {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const decoded = decodeURIComponent(value);
-    const parsed = JSON.parse(decoded) as
-      | { email?: string; code?: string; expiresAt?: number; targetMode?: string }
-      | null;
-
-    if (
-      !parsed?.email ||
-      !parsed.code ||
-      typeof parsed.expiresAt !== "number" ||
-      !Number.isFinite(parsed.expiresAt)
-    ) {
-      return null;
-    }
-
-    return {
-      email: normalizeEmail(parsed.email),
-      code: parsed.code,
-      expiresAt: parsed.expiresAt,
-      targetMode: resolveTwoFactorTargetMode(parsed.targetMode)
-    };
-  } catch {
-    return null;
-  }
-}
-
 export function generateTwoFactorCode() {
-  return String(Math.floor(100000 + Math.random() * 900000));
-}
-
-export function isExpiredTwoFactorChallenge(challenge: TwoFactorChallenge) {
-  return challenge.expiresAt <= Date.now();
+  try {
+    const values = new Uint32Array(1);
+    crypto.getRandomValues(values);
+    const value = 100000 + ((values[0] ?? 0) % 900000);
+    return String(value);
+  } catch {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
 }
 
 export function isValidTwoFactorCodeFormat(code: string) {

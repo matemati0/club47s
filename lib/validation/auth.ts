@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { isSupportedSocialProvider } from "@/lib/auth";
+
+const SUPPORTED_SOCIAL_PROVIDERS = ["google", "facebook"] as const;
+
+function isSupportedSocialProvider(
+  value: string
+): value is (typeof SUPPORTED_SOCIAL_PROVIDERS)[number] {
+  return SUPPORTED_SOCIAL_PROVIDERS.includes(value as (typeof SUPPORTED_SOCIAL_PROVIDERS)[number]);
+}
 
 export const loginSchema = z.object({
   email: z

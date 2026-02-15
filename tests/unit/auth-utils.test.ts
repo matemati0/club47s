@@ -4,18 +4,16 @@ import {
   DEFAULT_ADMIN_PASSWORD,
   DEFAULT_MEMBER_EMAIL,
   DEFAULT_MEMBER_PASSWORD,
-  isExpiredTwoFactorChallenge,
+  createAuthToken,
   isSupportedSocialProvider,
   isValidAdminCredentials,
   isValidMemberCredentials,
   isValidMockMemberCredentials,
   maskEmail,
   parseRegisteredMemberCredentials,
-  parseTwoFactorChallenge,
   resolveAuthMode,
   shouldExposeDebugTwoFactorCode,
-  serializeRegisteredMemberCredentials,
-  serializeTwoFactorChallenge
+  serializeRegisteredMemberCredentials
 } from "@/lib/auth";
 import {
   loginSchema,
@@ -25,15 +23,20 @@ import {
 } from "@/lib/validation/auth";
 
 describe("resolveAuthMode", () => {
-  it("returns valid modes", () => {
-    expect(resolveAuthMode("member")).toBe("member");
-    expect(resolveAuthMode("anonymous")).toBe("anonymous");
-    expect(resolveAuthMode("admin")).toBe("admin");
+  it("returns valid modes from signed token", async () => {
+    const memberToken = await createAuthToken("member");
+    const anonymousToken = await createAuthToken("anonymous");
+    const adminToken = await createAuthToken("admin");
+
+    await expect(resolveAuthMode(memberToken)).resolves.toBe("member");
+    await expect(resolveAuthMode(anonymousToken)).resolves.toBe("anonymous");
+    await expect(resolveAuthMode(adminToken)).resolves.toBe("admin");
   });
 
-  it("falls back to guest for unknown values", () => {
-    expect(resolveAuthMode(undefined)).toBe("guest");
-    expect(resolveAuthMode("super-admin")).toBe("guest");
+  it("falls back to guest for unknown values", async () => {
+    await expect(resolveAuthMode(undefined)).resolves.toBe("guest");
+    await expect(resolveAuthMode("member")).resolves.toBe("guest");
+    await expect(resolveAuthMode("super-admin")).resolves.toBe("guest");
   });
 });
 
@@ -154,42 +157,6 @@ describe("registered member cookies", () => {
 });
 
 describe("two-factor helpers", () => {
-  it("supports challenge roundtrip", () => {
-    const challenge = {
-      email: "member@club47.co.il",
-      code: "654321",
-      expiresAt: Date.now() + 10_000,
-      targetMode: "member" as const
-    };
-    const encoded = serializeTwoFactorChallenge(challenge);
-    const parsed = parseTwoFactorChallenge(encoded);
-    expect(parsed).toEqual(challenge);
-  });
-
-  it("detects expiration", () => {
-    expect(
-      isExpiredTwoFactorChallenge({
-        email: "member@club47.co.il",
-        code: "111111",
-        expiresAt: Date.now() - 1,
-        targetMode: "member"
-      })
-    ).toBe(true);
-  });
-
-  it("defaults missing target mode to member for old cookies", () => {
-    const encoded = encodeURIComponent(
-      JSON.stringify({
-        email: "member@club47.co.il",
-        code: "123456",
-        expiresAt: Date.now() + 10_000
-      })
-    );
-
-    const parsed = parseTwoFactorChallenge(encoded);
-    expect(parsed?.targetMode).toBe("member");
-  });
-
   it("masks email and validates social providers", () => {
     expect(maskEmail("member@club47.co.il")).toContain("***");
     expect(isSupportedSocialProvider("google")).toBe(true);

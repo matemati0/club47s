@@ -1,24 +1,13 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AdminProductsTab } from "@/components/admin/AdminProductsTab";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import type { Product } from "@/lib/products/types";
 
 type AdminTab = "dashboard" | "products" | "orders" | "members" | "settings";
-
-type AdminProduct = {
-  id: string;
-  name: string;
-  category: string;
-  packages: Array<{
-    label: string;
-    price: number;
-  }>;
-  stock: number;
-  status: "active" | "hidden";
-  updatedAt: string;
-};
 
 type OrderStatus = "new" | "confirmed" | "packed" | "delivered" | "cancelled";
 
@@ -49,142 +38,6 @@ type AdminSettings = {
   announcement: string;
   allowAnonymousCatalog: boolean;
 };
-
-const initialProducts: AdminProduct[] = [
-  {
-    id: "drops-women",
-    name: "טיפות לאישה",
-    category: "מוצרים לנשים",
-    packages: [{ label: "מעל 10 שימושים", price: 250 }],
-    stock: 44,
-    status: "active",
-    updatedAt: "12.02.2026"
-  },
-  {
-    id: "cream-women",
-    name: "קרם לאישה",
-    category: "מוצרים לנשים",
-    packages: [{ label: "יחידה", price: 240 }],
-    stock: 29,
-    status: "active",
-    updatedAt: "12.02.2026"
-  },
-  {
-    id: "cialis",
-    name: "סיאליס (Tadalafil)",
-    category: "מוצרים לגברים – טבליות וכדורים",
-    packages: [
-      { label: "10 כדורים", price: 200 },
-      { label: "20 כדורים", price: 300 },
-      { label: "40 כדורים", price: 500 }
-    ],
-    stock: 74,
-    status: "active",
-    updatedAt: "12.02.2026"
-  },
-  {
-    id: "cenforce-100",
-    name: "סנפורס (Cenforce 100)",
-    category: "מוצרים לגברים – טבליות וכדורים",
-    packages: [
-      { label: "10 כדורים", price: 200 },
-      { label: "20 כדורים", price: 350 },
-      { label: "40 כדורים", price: 580 }
-    ],
-    stock: 65,
-    status: "active",
-    updatedAt: "11.02.2026"
-  },
-  {
-    id: "cenforce-150",
-    name: "סנפורס (Cenforce 150)",
-    category: "מוצרים לגברים – טבליות וכדורים",
-    packages: [
-      { label: "10 כדורים", price: 220 },
-      { label: "20 כדורים", price: 370 },
-      { label: "40 כדורים", price: 600 }
-    ],
-    stock: 48,
-    status: "active",
-    updatedAt: "11.02.2026"
-  },
-  {
-    id: "cenforce-200",
-    name: "סנפורס (Cenforce 200) - מבצע",
-    category: "מוצרים לגברים – טבליות וכדורים",
-    packages: [
-      { label: "10 כדורים", price: 300 },
-      { label: "20 כדורים", price: 500 },
-      { label: "40 כדורים", price: 600 }
-    ],
-    stock: 37,
-    status: "active",
-    updatedAt: "10.02.2026"
-  },
-  {
-    id: "fildena",
-    name: "פילנדה (Fildena 100 / 150 מ\"ג)",
-    category: "מוצרים לגברים – טבליות וכדורים",
-    packages: [
-      { label: "10 כדורים", price: 250 },
-      { label: "20 כדורים", price: 450 },
-      { label: "40 כדורים", price: 700 }
-    ],
-    stock: 31,
-    status: "active",
-    updatedAt: "09.02.2026"
-  },
-  {
-    id: "kamagra-jelly",
-    name: "Kamagra Oral Jelly",
-    category: "מוצרים לגברים – ג'לי ומדבקות",
-    packages: [
-      { label: "7 יחידות", price: 170 },
-      { label: "21 יחידות", price: 280 },
-      { label: "35 יחידות", price: 650 }
-    ],
-    stock: 26,
-    status: "active",
-    updatedAt: "09.02.2026"
-  },
-  {
-    id: "oral-strips",
-    name: "Oral Strips - מדבקות ללשון",
-    category: "מוצרים לגברים – ג'לי ומדבקות",
-    packages: [
-      { label: "10 יחידות", price: 340 },
-      { label: "20 יחידות", price: 600 },
-      { label: "40 יחידות", price: 900 }
-    ],
-    stock: 22,
-    status: "active",
-    updatedAt: "09.02.2026"
-  },
-  {
-    id: "turkish-honey",
-    name: "דבש טורקי איכותי (275 מ\"ל)",
-    category: "מוצרים לגברים – ג'לי ומדבקות",
-    packages: [
-      { label: "יחידה", price: 250 },
-      { label: "3 יחידות", price: 600 }
-    ],
-    stock: 18,
-    status: "active",
-    updatedAt: "08.02.2026"
-  },
-  {
-    id: "aphrodite-chocolate",
-    name: "Aphrodite Chocolate",
-    category: "מוצרים משותפים – לגברים ולנשים",
-    packages: [
-      { label: "12 פרלינים", price: 300 },
-      { label: "24 פרלינים", price: 500 }
-    ],
-    stock: 19,
-    status: "active",
-    updatedAt: "08.02.2026"
-  }
-];
 
 const initialOrders: AdminOrder[] = [
   {
@@ -256,12 +109,6 @@ function formatPrice(value: number) {
   return `${value.toLocaleString("he-IL")} ₪`;
 }
 
-function formatProductPackages(
-  packages: Array<{ label: string; price: number }>
-) {
-  return packages.map((item) => `${item.label}: ${formatPrice(item.price)}`).join(" | ");
-}
-
 function resolveOrderStatusLabel(status: OrderStatus) {
   if (status === "new") {
     return "חדש";
@@ -283,16 +130,32 @@ export function AdminPanel() {
   const { logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
-  const [products, setProducts] = useState<AdminProduct[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<AdminOrder[]>(initialOrders);
   const [members, setMembers] = useState<ClubMember[]>(initialMembers);
   const [settings, setSettings] = useState<AdminSettings>(initialSettings);
   const [statusMessage, setStatusMessage] = useState("");
-  const [newProductName, setNewProductName] = useState("");
-  const [newProductCategory, setNewProductCategory] = useState("");
-  const [newProductPackageLabel, setNewProductPackageLabel] = useState("יחידה");
-  const [newProductPrice, setNewProductPrice] = useState("");
-  const [newProductStock, setNewProductStock] = useState("");
+
+  const reloadProducts = useCallback(async () => {
+    const response = await fetch("/api/admin/products", { cache: "no-store" });
+    const payload = (await response.json().catch(() => null)) as
+      | { products?: Product[]; message?: string }
+      | null;
+
+    if (!response.ok) {
+      throw new Error(payload?.message ?? "לא ניתן לטעון מוצרים");
+    }
+
+    setProducts(Array.isArray(payload?.products) ? payload.products : []);
+  }, []);
+
+  useEffect(() => {
+    reloadProducts().catch((error) => {
+      setStatusMessage(
+        error instanceof Error ? error.message : "לא ניתן לטעון מוצרים"
+      );
+    });
+  }, [reloadProducts]);
 
   const nextThemeLabel =
     theme === "dark" ? "למצב יום" : theme === "light" ? "למצב סגול" : "למצב לילה";
@@ -317,69 +180,6 @@ export function AdminPanel() {
   const handleLogout = async () => {
     await logout();
     router.push("/admin/login");
-  };
-
-  const handleAddProduct = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const price = Number(newProductPrice);
-    const stock = Number(newProductStock);
-
-    if (
-      !newProductName.trim() ||
-      !newProductCategory.trim() ||
-      !newProductPackageLabel.trim() ||
-      price <= 0 ||
-      stock < 0
-    ) {
-      setStatusMessage("יש למלא שם, קטגוריה, חבילה, מחיר ומלאי תקינים.");
-      return;
-    }
-
-    const item: AdminProduct = {
-      id: `new-${Date.now()}`,
-      name: newProductName.trim(),
-      category: newProductCategory.trim(),
-      packages: [{ label: newProductPackageLabel.trim(), price }],
-      stock,
-      status: "active",
-      updatedAt: new Date().toLocaleDateString("he-IL")
-    };
-
-    setProducts((prev) => [item, ...prev]);
-    setNewProductName("");
-    setNewProductCategory("");
-    setNewProductPackageLabel("יחידה");
-    setNewProductPrice("");
-    setNewProductStock("");
-    setStatusMessage("מוצר חדש נוסף בהצלחה.");
-  };
-
-  const toggleProductStatus = (id: string) => {
-    setProducts((prev) =>
-      prev.map((product) =>
-        product.id === id
-          ? {
-              ...product,
-              status: product.status === "active" ? "hidden" : "active",
-              updatedAt: new Date().toLocaleDateString("he-IL")
-            }
-          : product
-      )
-    );
-  };
-
-  const updateProductStock = (id: string, stock: number) => {
-    setProducts((prev) =>
-      prev.map((product) =>
-        product.id === id
-          ? {
-              ...product,
-              stock: Math.max(0, stock),
-              updatedAt: new Date().toLocaleDateString("he-IL")
-            }
-          : product
-      )
-    );
   };
 
   const updateOrderStatus = (id: string, status: OrderStatus) => {
@@ -546,99 +346,12 @@ export function AdminPanel() {
         ) : null}
 
         {activeTab === "products" ? (
-          <section className="mt-6 space-y-6">
-            <article className="club-panel p-6">
-              <h2 className="text-2xl font-medium">הוספת מוצר חדש</h2>
-              <form onSubmit={handleAddProduct} className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                <input
-                  value={newProductName}
-                  onChange={(event) => setNewProductName(event.target.value)}
-                  placeholder="שם מוצר"
-                  className="club-field h-11"
-                />
-                <input
-                  value={newProductCategory}
-                  onChange={(event) => setNewProductCategory(event.target.value)}
-                  placeholder="קטגוריה"
-                  className="club-field h-11"
-                />
-                <input
-                  value={newProductPackageLabel}
-                  onChange={(event) => setNewProductPackageLabel(event.target.value)}
-                  placeholder="שם חבילה (למשל 10 כדורים)"
-                  className="club-field h-11"
-                />
-                <input
-                  type="number"
-                  value={newProductPrice}
-                  onChange={(event) => setNewProductPrice(event.target.value)}
-                  placeholder="מחיר לחבילה"
-                  className="club-field h-11"
-                />
-                <input
-                  type="number"
-                  value={newProductStock}
-                  onChange={(event) => setNewProductStock(event.target.value)}
-                  placeholder="מלאי"
-                  className="club-field h-11"
-                />
-                <button type="submit" className="club-btn-primary h-11 sm:col-span-2 lg:col-span-5">
-                  הוסף מוצר למערכת
-                </button>
-              </form>
-            </article>
-
-            <article className="club-panel overflow-x-auto p-4 sm:p-6">
-              <h2 className="mb-4 text-2xl font-medium">רשימת מוצרים</h2>
-              <table className="w-full min-w-[980px] text-right text-sm">
-                <thead>
-                  <tr className="border-b border-club-darkGray text-club-lightGray">
-                    <th className="px-2 py-3 font-normal">מוצר</th>
-                    <th className="px-2 py-3 font-normal">קטגוריה</th>
-                    <th className="px-2 py-3 font-normal">חבילות ומחירים</th>
-                    <th className="px-2 py-3 font-normal">מלאי</th>
-                    <th className="px-2 py-3 font-normal">סטטוס</th>
-                    <th className="px-2 py-3 font-normal">עודכן</th>
-                    <th className="px-2 py-3 font-normal">פעולות</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((product) => (
-                    <tr key={product.id} className="border-b border-club-darkGray/60">
-                      <td className="px-2 py-3">{product.name}</td>
-                      <td className="px-2 py-3 text-club-lightGray">{product.category}</td>
-                      <td className="px-2 py-3 text-club-lightGray">
-                        {formatProductPackages(product.packages)}
-                      </td>
-                      <td className="px-2 py-3">
-                        <input
-                          type="number"
-                          value={product.stock}
-                          onChange={(event) =>
-                            updateProductStock(product.id, Number(event.target.value))
-                          }
-                          className="club-field h-9 w-24"
-                        />
-                      </td>
-                      <td className="px-2 py-3">
-                        {product.status === "active" ? "פעיל" : "מוסתר"}
-                      </td>
-                      <td className="px-2 py-3 text-club-lightGray">{product.updatedAt}</td>
-                      <td className="px-2 py-3">
-                        <button
-                          type="button"
-                          onClick={() => toggleProductStatus(product.id)}
-                          className="rounded-md border border-club-darkGray px-3 py-1 text-xs text-club-lightGray hover:border-club-white hover:text-club-white"
-                        >
-                          {product.status === "active" ? "הסתר" : "הפעל"}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </article>
-          </section>
+          <AdminProductsTab
+            products={products}
+            setProducts={setProducts}
+            onStatusMessage={setStatusMessage}
+            reloadProducts={reloadProducts}
+          />
         ) : null}
 
         {activeTab === "orders" ? (

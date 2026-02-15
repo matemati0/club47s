@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   AUTH_COOKIE_NAME,
   TWO_FACTOR_COOKIE_NAME,
-  getAuthCookieOptions,
-  isExpiredTwoFactorChallenge,
-  isValidTwoFactorCodeFormat,
-  parseTwoFactorChallenge
+  createAuthToken,
+  getAuthCookieOptions
 } from "@/lib/auth";
+import {
+  getTwoFactorChallengeMeta,
+  verifyAndConsumeTwoFactorChallenge
+} from "@/lib/security/twoFactorChallenges";
 import {
   getLoginBlockState,
   getLoginRateLimitKey,
@@ -14,6 +16,9 @@ import {
   clearFailedLoginAttempts
 } from "@/lib/security/loginRateLimit";
 import { twoFactorVerifySchema } from "@/lib/validation/auth";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 function jsonRateLimitResponse(retryAfterSeconds: number) {
   return NextResponse.json(
@@ -42,10 +47,9 @@ function getTwoFactorRateLimitKey(request: NextRequest, emailHint?: string) {
 }
 
 export async function POST(request: NextRequest) {
-  const challenge = parseTwoFactorChallenge(
-    request.cookies.get(TWO_FACTOR_COOKIE_NAME)?.value
-  );
-  const rateLimitKey = getTwoFactorRateLimitKey(request, challenge?.email);
+  const challengeId = request.cookies.get(TWO_FACTOR_COOKIE_NAME)?.value;
+  const meta = challengeId ? getTwoFactorChallengeMeta(challengeId) : null;
+  const rateLimitKey = getTwoFactorRateLimitKey(request, meta?.email);
 
   const blockedState = getLoginBlockState(rateLimitKey);
   if (blockedState.blocked) {
@@ -76,7 +80,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!challenge || isExpiredTwoFactorChallenge(challenge)) {
+  if (!challengeId || !meta) {
     const failureState = registerFailedLoginAttempt(rateLimitKey);
     await applyDelay(failureState.delayMs);
 
@@ -90,7 +94,8 @@ export async function POST(request: NextRequest) {
     return response;
   }
 
-  if (!isValidTwoFactorCodeFormat(challenge.code) || parsed.data.code !== challenge.code) {
+  const verification = verifyAndConsumeTwoFactorChallenge(challengeId, parsed.data.code);
+  if (!verification.ok) {
     const failureState = registerFailedLoginAttempt(rateLimitKey);
     await applyDelay(failureState.delayMs);
 
@@ -101,18 +106,21 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "קוד האימות אינו נכון"
+        message:
+          verification.reason === "expired"
+            ? "קוד האימות פג תוקף. נסה להתחבר מחדש."
+            : "קוד האימות אינו נכון"
       },
       { status: 401 }
     );
   }
 
   clearFailedLoginAttempts(rateLimitKey);
-
-  const resolvedMode = challenge.targetMode === "admin" ? "admin" : "member";
+  const resolvedMode = verification.targetMode === "admin" ? "admin" : "member";
+  const token = await createAuthToken(resolvedMode);
 
   const response = NextResponse.json({ mode: resolvedMode });
-  response.cookies.set(AUTH_COOKIE_NAME, resolvedMode, getAuthCookieOptions());
+  response.cookies.set(AUTH_COOKIE_NAME, token, getAuthCookieOptions());
   response.cookies.set(TWO_FACTOR_COOKIE_NAME, "", { path: "/", maxAge: 0 });
   return response;
 }

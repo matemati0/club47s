@@ -39,6 +39,10 @@ function buildHtmlBody(input: SendTwoFactorCodeInput) {
 }
 
 export async function sendTwoFactorCodeEmail(input: SendTwoFactorCodeInput) {
+  if (process.env.DISABLE_EMAIL_DELIVERY === "true") {
+    return { sent: false as const, reason: "disabled" as const };
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL;
 
