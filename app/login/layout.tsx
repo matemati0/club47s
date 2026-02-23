@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "ויאגרה | קאמגרה | סיאליס - כניסה והרשמה",
+  title: "כניסת חברים",
   description:
-    "Club47 - ויאגרה, קאמגרה וסיאליס במקום אחד. כניסה לחברי מועדון או הרשמה מהירה לגישה פרטית ודיסקרטית."
+    "עמוד התחברות לחברי Club47 עם אימות דו-שלבי."
 };
 
 export default function LoginLayout({ children }: { children: React.ReactNode }) {

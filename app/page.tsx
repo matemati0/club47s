@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { AnonymousBanner } from "@/components/AnonymousBanner";
 import { AnonymousContent, MemberContent } from "@/components/HomeContent";
+import { PublicLanding } from "@/components/PublicLanding";
 import { useAuth } from "@/context/AuthContext";
 
 export default function HomePage() {
@@ -12,18 +13,17 @@ export default function HomePage() {
   const { mode, isAnonymous, isAuthenticated, isAdmin } = useAuth();
 
   useEffect(() => {
-    if (mode === "guest") {
-      router.replace("/login");
-      return;
-    }
-
     if (mode === "admin") {
       router.replace("/admin");
     }
   }, [mode, router]);
 
-  if (mode === "guest" || isAdmin) {
+  if (isAdmin) {
     return <div className="min-h-screen bg-club-black" />;
+  }
+
+  if (mode === "guest") {
+    return <PublicLanding />;
   }
 
   return (
