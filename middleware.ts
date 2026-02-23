@@ -15,7 +15,31 @@ function applySecurityHeaders(response: NextResponse) {
   return response;
 }
 
+function shouldRedirectToHttps(request: NextRequest) {
+  if (process.env.NODE_ENV !== "production") {
+    return false;
+  }
+
+  const host = request.headers.get("host")?.toLowerCase() ?? "";
+  if (host.startsWith("localhost") || host.startsWith("127.0.0.1")) {
+    return false;
+  }
+
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  if (forwardedProto) {
+    return forwardedProto.split(",")[0]?.trim().toLowerCase() !== "https";
+  }
+
+  return request.nextUrl.protocol === "http:";
+}
+
 export async function middleware(request: NextRequest) {
+  if (shouldRedirectToHttps(request)) {
+    const secureUrl = request.nextUrl.clone();
+    secureUrl.protocol = "https:";
+    return applySecurityHeaders(NextResponse.redirect(secureUrl, 308));
+  }
+
   const mode = await resolveAuthMode(request.cookies.get(AUTH_COOKIE_NAME)?.value);
   const { pathname } = request.nextUrl;
 
@@ -55,5 +79,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/register", "/admin/:path*"]
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)"
+  ]
 };

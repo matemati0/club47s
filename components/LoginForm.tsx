@@ -331,6 +331,18 @@ export function LoginForm() {
       >
         המשך כאנונימי
       </button>
+
+      <p className="mt-4 text-center text-xs leading-relaxed text-club-lightGray">
+        המשך שימוש באתר מהווה הסכמה ל{" "}
+        <Link href="/terms-of-use" className="text-club-white hover:opacity-80">
+          תנאי השימוש
+        </Link>{" "}
+        ול{" "}
+        <Link href="/privacy-policy" className="text-club-white hover:opacity-80">
+          מדיניות הפרטיות
+        </Link>
+        .
+      </p>
     </div>
   );
 }

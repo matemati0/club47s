@@ -52,11 +52,15 @@ export async function POST(request: NextRequest) {
     purpose: "register"
   });
   const debugCode = shouldExposeDebugTwoFactorCode() ? code : undefined;
+  const emailFailureReasonSuffix =
+    !emailDelivery.sent && process.env.NODE_ENV !== "production"
+      ? ` (reason: ${emailDelivery.reason})`
+      : "";
 
   if (!emailDelivery.sent && !debugCode) {
     const response = NextResponse.json(
       {
-        message: "שליחת המייל לא זמינה כרגע. נסה שוב בעוד מספר דקות."
+        message: `שליחת המייל לא זמינה כרגע. נסה שוב בעוד מספר דקות.${emailFailureReasonSuffix}`
       },
       { status: 503 }
     );
@@ -79,8 +83,8 @@ export async function POST(request: NextRequest) {
     message: emailDelivery.sent
       ? "קוד אימות נשלח לאימייל כדי לאשר את ההרשמה"
       : debugCode
-        ? "שליחת המייל לא זמינה כרגע. ניתן להשתמש בקוד הבדיקה."
-        : "שליחת המייל לא זמינה כרגע. נסה שוב בעוד מספר דקות.",
+        ? `שליחת המייל לא זמינה כרגע. ניתן להשתמש בקוד הבדיקה.${emailFailureReasonSuffix}`
+        : `שליחת המייל לא זמינה כרגע. נסה שוב בעוד מספר דקות.${emailFailureReasonSuffix}`,
     debugCode: emailDelivery.sent ? undefined : debugCode
   });
   response.cookies.set(

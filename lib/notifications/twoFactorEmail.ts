@@ -40,6 +40,7 @@ function buildHtmlBody(input: SendTwoFactorCodeInput) {
 
 export async function sendTwoFactorCodeEmail(input: SendTwoFactorCodeInput) {
   if (process.env.DISABLE_EMAIL_DELIVERY === "true") {
+    console.warn("[2FA] Email delivery is disabled via DISABLE_EMAIL_DELIVERY=true");
     return { sent: false as const, reason: "disabled" as const };
   }
 

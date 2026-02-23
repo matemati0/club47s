@@ -302,6 +302,18 @@ export function RegisterForm() {
           התחבר כאן
         </Link>
       </p>
+
+      <p className="mt-4 text-center text-xs leading-relaxed text-club-lightGray">
+        ביצוע הרשמה מהווה הסכמה ל{" "}
+        <Link href="/terms-of-use" className="text-club-white hover:opacity-80">
+          תנאי השימוש
+        </Link>{" "}
+        ול{" "}
+        <Link href="/privacy-policy" className="text-club-white hover:opacity-80">
+          מדיניות הפרטיות
+        </Link>
+        .
+      </p>
     </form>
   );
 }

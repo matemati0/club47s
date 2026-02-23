@@ -5,6 +5,8 @@ import "@/styles/globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { AUTH_COOKIE_NAME, resolveAuthMode } from "@/lib/auth";
+import { LegalFooter } from "@/components/LegalFooter";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -27,9 +29,17 @@ export default async function RootLayout({
 
   return (
     <html lang="he" dir="rtl" data-theme="dark" suppressHydrationWarning>
-      <body className={`${heebo.className} bg-club-black text-club-white antialiased`}>
+      <body
+        className={`${heebo.className} min-h-screen bg-club-black text-club-white antialiased`}
+      >
         <ThemeProvider>
-          <AuthProvider initialMode={initialMode}>{children}</AuthProvider>
+          <AuthProvider initialMode={initialMode}>
+            <div className="flex min-h-screen flex-col">
+              <div className="flex-1">{children}</div>
+              <LegalFooter />
+            </div>
+            <CookieConsentBanner />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
