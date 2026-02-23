@@ -16,8 +16,12 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "מועדון פרטי",
-  description: "אזור פרטי לחברי המועדון"
+  title: {
+    default: "Club47 - ויאגרה | קאמגרה | סיאליס - מועדון פרטי דיסקרטי בישראל",
+    template: "%s | Club47"
+  },
+  description:
+    "ויאגרה גנרית, קאמגרה ג'לי וסיאליס עד 36 שעות. משלוח אנונימי ודיסקרטי בכל הארץ לחברי Club47."
 };
 
 export default async function RootLayout({

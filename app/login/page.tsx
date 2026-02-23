@@ -1,10 +1,29 @@
-﻿"use client";
+"use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LoginForm } from "@/components/LoginForm";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+
+const productHighlights = [
+  {
+    title: "ויאגרה",
+    description: "ויאגרה גנרית (סילדנפיל) לזמן תגובה מהיר וביצועים חזקים.",
+    href: "/viagra"
+  },
+  {
+    title: "קאמגרה",
+    description: "קאמגרה ג׳לי ומדבקות לספיגה מהירה, נוחות מלאה ודיסקרטיות.",
+    href: "/kamagra"
+  },
+  {
+    title: "סיאליס",
+    description: "סיאליס גנרי (טדלפיל) לעד 36 שעות של ביטחון וגמישות.",
+    href: "/cialis"
+  }
+];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,30 +48,104 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="club-shell flex min-h-screen items-center justify-center py-12">
-      <section className="club-panel w-full max-w-3xl p-8 text-center sm:p-12 animate-fade">
-        <div className="mb-8 flex justify-start">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="rounded-lg border border-club-darkGray px-4 py-2 text-sm text-club-lightGray hover:border-club-white hover:text-club-white"
-          >
-            {nextThemeLabel}
-          </button>
-        </div>
+    <main className="club-shell py-8 sm:py-12">
+      <section className="grid gap-8 lg:grid-cols-[1.2fr_0.9fr]">
+        <article className="club-panel animate-fade p-8 sm:p-10">
+          <p className="club-kicker">PUBLIC LANDING</p>
+          <h1 className="mt-4 text-3xl font-medium leading-tight text-club-white sm:text-5xl">
+            Club47 - <strong>ויאגרה</strong> | <strong>קאמגרה</strong> | <strong>סיאליס</strong>
+            <span className="mt-2 block text-2xl sm:text-4xl">הגישה הפרטית שלך למה שבאמת עובד</span>
+          </h1>
 
-        <p className="club-kicker">MEMBERS ENTRY</p>
-        <h1 className="mt-4 text-4xl font-medium tracking-wide text-club-white sm:text-5xl">
-          ברוכים הבאים למועדון
-        </h1>
-        <p className="mt-4 text-base text-club-lightGray sm:text-lg">
-          הכניסה מיועדת לחברי מועדון בלבד עם אימות דו-שלבי
-        </p>
+          <p className="mt-6 text-base leading-relaxed text-club-lightGray sm:text-lg">
+            מחפש <strong>ויאגרה</strong> אמינה? רוצה <strong>קאמגרה</strong> מהירה וטעימה? או מעדיף
+            <strong> סיאליס</strong> ל-36 שעות חופש מלא? ב-Club47 תמצא גישה דיסקרטית למוצרים
+            הפופולריים ביותר עם אריזה אנונימית ומשלוח בכל הארץ.
+          </p>
 
-        <div className="mx-auto mt-10 max-w-md">
+          <ul className="mt-6 space-y-3 text-sm leading-relaxed text-club-lightGray sm:text-base">
+            <li>
+              <strong className="text-club-white">ויאגרה גנרית (סילדנפיל):</strong> זקפה חזקה ומהירה
+              למי שמעדיף קלאסיקה אמינה.
+            </li>
+            <li>
+              <strong className="text-club-white">קאמגרה ג׳לי / מדבקות:</strong> ספיגה תוך דקות,
+              טעמים נוחים ושימוש מהיר בלי סרבול.
+            </li>
+            <li>
+              <strong className="text-club-white">סיאליס גנרי (טדלפיל):</strong> עד יום וחצי של
+              ביטחון ספונטני בלי לחץ של תזמון.
+            </li>
+          </ul>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/register" className="club-btn-primary h-12 px-6 text-base">
+              הרשמה ל-Club47 - גישה פרטית עכשיו
+            </Link>
+            <Link href="#members-login" className="club-btn-secondary h-12 px-6 text-base">
+              כבר חבר? התחבר
+            </Link>
+          </div>
+
+          <p className="mt-4 text-xs leading-relaxed text-club-lightGray">
+            18+ בלבד | אריזה ללא כיתובים | משלוח אנונימי ודיסקרטי
+          </p>
+        </article>
+
+        <section id="members-login" className="club-panel animate-fade p-8 sm:p-10">
+          <div className="mb-8 flex justify-between gap-3">
+            <div>
+              <p className="club-kicker">MEMBERS ENTRY</p>
+              <h2 className="mt-3 text-2xl font-medium text-club-white sm:text-3xl">כניסת חברים</h2>
+            </div>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="h-fit rounded-lg border border-club-darkGray px-4 py-2 text-sm text-club-lightGray hover:border-club-white hover:text-club-white"
+            >
+              {nextThemeLabel}
+            </button>
+          </div>
+
+          <p className="mb-8 text-sm leading-relaxed text-club-lightGray sm:text-base">
+            הכניסה מיועדת לחברי מועדון בלבד עם אימות דו-שלבי.
+          </p>
+
           <LoginForm />
-        </div>
+        </section>
+      </section>
+
+      <section className="mt-8 grid gap-4 sm:grid-cols-3">
+        {productHighlights.map((item) => (
+          <article key={item.title} className="club-card p-5 sm:p-6">
+            <h2 className="text-xl font-medium text-club-white">
+              <strong>{item.title}</strong>
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-club-lightGray">{item.description}</p>
+            <Link href={item.href} className="mt-5 inline-flex text-sm text-club-white hover:opacity-80">
+              קרא עוד על {item.title}
+            </Link>
+          </article>
+        ))}
+      </section>
+
+      <section className="club-panel mt-8 animate-fade p-6 sm:p-8">
+        <p className="club-kicker">SEO ARTICLE</p>
+        <h2 className="mt-3 text-2xl font-medium text-club-white sm:text-3xl">
+          ויאגרה vs קאמגרה vs סיאליס - מה הכי מתאים לך ב-2026?
+        </h2>
+        <p className="mt-4 max-w-3xl text-sm leading-relaxed text-club-lightGray sm:text-base">
+          מדריך השוואה מהיר בין <strong>ויאגרה</strong>, <strong>קאמגרה</strong> ו-
+          <strong>סיאליס</strong>: זמני פעולה, התאמה לאורח חיים, טווחי מחירים ויתרונות מרכזיים.
+        </p>
+        <Link
+          href="/blog/viagra-vs-kamagra-vs-cialis-2026"
+          className="club-btn-secondary mt-6 h-11 w-fit px-5"
+        >
+          לקריאת המאמר המלא
+        </Link>
       </section>
     </main>
   );
 }
+
