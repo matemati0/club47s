@@ -7,9 +7,34 @@ export const metadata: Metadata = {
     "השוואה בין ויאגרה, קאמגרה וסיאליס: זמן פעולה, התאמה, טווחי מחירים ויתרונות מרכזיים לבחירה מדויקת יותר."
 };
 
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: "ויאגרה vs קאמגרה vs סיאליס - מה הכי מתאים לך ב-2026?",
+  description:
+    "השוואה בין ויאגרה, קאמגרה וסיאליס לפי זמן פעולה, נוחות שימוש והתאמה לאורח החיים.",
+  author: {
+    "@type": "Organization",
+    name: "Club47"
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "Club47"
+  },
+  mainEntityOfPage: "https://club47s.com/blog/viagra-vs-kamagra-vs-cialis-2026",
+  datePublished: "2026-02-23",
+  dateModified: "2026-02-23",
+  inLanguage: "he-IL"
+};
+
 export default function ComparisonArticlePage() {
   return (
     <main className="club-shell py-10 sm:py-14">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+
       <article className="club-panel animate-fade p-8 sm:p-10">
         <p className="club-kicker">BLOG ARTICLE</p>
         <h1 className="mt-4 text-3xl font-medium leading-tight text-club-white sm:text-5xl">

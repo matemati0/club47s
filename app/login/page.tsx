@@ -25,6 +25,38 @@ const productHighlights = [
   }
 ];
 
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  inLanguage: "he-IL",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "מה ההבדל בין ויאגרה, קאמגרה וסיאליס?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "ויאגרה מתאימה לרוב למי שמחפש תגובה מהירה, קאמגרה מוכרת בפורמטים נוחים כמו ג׳לי ומדבקות, וסיאליס מספקת טווח פעולה ארוך יותר עד 36 שעות."
+      }
+    },
+    {
+      "@type": "Question",
+      name: "האם המשלוח ב-Club47 דיסקרטי?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "כן. המשלוח מתבצע באריזה אנונימית וללא סימון חיצוני מזוהה."
+      }
+    },
+    {
+      "@type": "Question",
+      name: "איך מצטרפים למועדון?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "נרשמים בעמוד ההרשמה, מאמתים כתובת אימייל, ומתחברים לחשבון החברים עם אימות דו-שלבי."
+      }
+    }
+  ]
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const { mode } = useAuth();
@@ -49,6 +81,11 @@ export default function LoginPage() {
 
   return (
     <main className="club-shell py-8 sm:py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+
       <section className="grid gap-8 lg:grid-cols-[1.2fr_0.9fr]">
         <article className="club-panel animate-fade p-8 sm:p-10">
           <p className="club-kicker">PUBLIC LANDING</p>
