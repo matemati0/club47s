@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { AUTH_COOKIE_NAME, resolveAuthMode } from "@/lib/auth";
 import { LegalFooter } from "@/components/LegalFooter";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { AccessibilityWidget } from "@/components/AccessibilityWidget";
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -39,6 +40,7 @@ export default async function RootLayout({
               <LegalFooter />
             </div>
             <CookieConsentBanner />
+            <AccessibilityWidget />
           </AuthProvider>
         </ThemeProvider>
       </body>

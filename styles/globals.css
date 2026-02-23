@@ -89,6 +89,52 @@
     -webkit-text-fill-color: rgb(var(--club-white)) !important;
     transition: background-color 5000s ease-in-out 0s;
   }
+
+  html[data-a11y-text-scale="112"] {
+    font-size: 112.5%;
+  }
+
+  html[data-a11y-text-scale="125"] {
+    font-size: 125%;
+  }
+
+  html[data-a11y-high-contrast="true"] {
+    --club-black: 0 0 0;
+    --club-white: 255 255 255;
+    --club-dark-gray: 255 255 255;
+    --club-light-gray: 255 255 255;
+    --club-panel: 0 0 0;
+    --club-card: 0 0 0;
+    --club-field: 0 0 0;
+    --club-shadow-rgb: 0 0 0;
+  }
+
+  html[data-a11y-high-contrast="true"] a {
+    color: rgb(255 235 59);
+  }
+
+  html[data-a11y-high-contrast="true"] button:focus-visible,
+  html[data-a11y-high-contrast="true"] a:focus-visible,
+  html[data-a11y-high-contrast="true"] select:focus-visible,
+  html[data-a11y-high-contrast="true"] input:focus-visible {
+    outline: 2px solid rgb(255 235 59);
+    outline-offset: 3px;
+  }
+
+  html[data-a11y-underline-links="true"] a {
+    text-decoration: underline !important;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+
+  html[data-a11y-reduce-motion="true"] *,
+  html[data-a11y-reduce-motion="true"] *::before,
+  html[data-a11y-reduce-motion="true"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer components {
