@@ -84,7 +84,7 @@ export async function GET(
     return redirectToLogin(request, "oauth_exchange_failed");
   }
 
-  const redirectTo = new URL(oauthState.returnTo || "/club", request.url);
+  const redirectTo = new URL(oauthState.returnTo || "/", request.url);
   const response = NextResponse.redirect(redirectTo);
   const token = await createAuthToken("member");
 

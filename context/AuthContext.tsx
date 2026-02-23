@@ -209,7 +209,7 @@ export function AuthProvider({
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ provider, returnTo: "/club" })
+      body: JSON.stringify({ provider, returnTo: "/" })
     });
 
     if (!response.ok) {
