@@ -63,7 +63,7 @@ export function RegisterForm() {
         return;
       }
 
-      router.push("/");
+      router.push("/club");
     } catch (submitError) {
       if (submitError instanceof AuthActionError) {
         setErrors({
@@ -104,7 +104,7 @@ export function RegisterForm() {
 
     try {
       await verifyTwoFactor(parsed.data.code);
-      router.push("/");
+      router.push("/club");
     } catch (verifyError) {
       if (verifyError instanceof AuthActionError) {
         setErrors({

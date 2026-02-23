@@ -99,7 +99,7 @@ export function LoginForm() {
         return;
       }
 
-      router.push("/");
+      router.push("/club");
     } catch (submitError) {
       if (submitError instanceof AuthActionError) {
         setErrors({
@@ -137,7 +137,7 @@ export function LoginForm() {
 
     try {
       await verifyTwoFactor(parsed.data.code);
-      router.push("/");
+      router.push("/club");
     } catch (verifyError) {
       if (verifyError instanceof AuthActionError) {
         setErrors({
@@ -180,7 +180,7 @@ export function LoginForm() {
     setErrors({});
     try {
       await continueAsAnonymous();
-      router.push("/");
+      router.push("/club");
     } catch {
       setErrors({ form: "לא ניתן לעבור למצב אנונימי כעת" });
     }

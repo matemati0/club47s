@@ -14,17 +14,12 @@ export default function LoginPage() {
     theme === "dark" ? "למצב יום" : theme === "light" ? "למצב סגול" : "למצב לילה";
 
   useEffect(() => {
-    if (mode === "member") {
-      router.replace("/");
-      return;
-    }
-
     if (mode === "admin") {
       router.replace("/admin");
     }
   }, [mode, router]);
 
-  if (mode === "member" || mode === "admin") {
+  if (mode === "admin") {
     return <div className="min-h-screen bg-club-black" />;
   }
 
@@ -56,4 +51,3 @@ export default function LoginPage() {
     </main>
   );
 }
-

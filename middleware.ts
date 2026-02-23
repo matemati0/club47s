@@ -43,16 +43,19 @@ export async function middleware(request: NextRequest) {
   const mode = await resolveAuthMode(request.cookies.get(AUTH_COOKIE_NAME)?.value);
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/") {
-    if (mode === "admin") {
-      const adminUrl = new URL("/admin", request.url);
-      return applySecurityHeaders(NextResponse.redirect(adminUrl));
-    }
+  if (pathname === "/register" && mode === "member") {
+    const clubUrl = new URL("/club", request.url);
+    return applySecurityHeaders(NextResponse.redirect(clubUrl));
   }
 
-  if ((pathname === "/login" || pathname === "/register") && mode === "member") {
-    const homeUrl = new URL("/", request.url);
-    return applySecurityHeaders(NextResponse.redirect(homeUrl));
+  if (pathname === "/club" && mode === "guest") {
+    const loginUrl = new URL("/login", request.url);
+    return applySecurityHeaders(NextResponse.redirect(loginUrl));
+  }
+
+  if (pathname === "/club" && mode === "admin") {
+    const adminUrl = new URL("/admin", request.url);
+    return applySecurityHeaders(NextResponse.redirect(adminUrl));
   }
 
   if ((pathname === "/login" || pathname === "/register") && mode === "admin") {

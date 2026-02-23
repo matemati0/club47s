@@ -15,7 +15,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (mode === "member") {
-      router.replace("/");
+      router.replace("/club");
       return;
     }
 

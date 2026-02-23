@@ -15,7 +15,7 @@ export function Header() {
   const handleExit = async () => {
     try {
       await logout();
-      router.push("/login");
+      router.push("/");
     } catch {
       router.refresh();
     }
