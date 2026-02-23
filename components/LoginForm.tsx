@@ -328,7 +328,7 @@ export function LoginForm() {
         <p className="text-center text-xs tracking-[0.16em] text-club-lightGray">
           כניסה מהירה
         </p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="mt-3 grid gap-3">
           <button
             type="button"
             disabled={isBusy}
@@ -336,14 +336,6 @@ export function LoginForm() {
             className="club-btn-secondary w-full disabled:cursor-not-allowed disabled:opacity-60"
           >
             {socialLoading === "google" ? "מתחבר..." : "התחבר עם Gmail"}
-          </button>
-          <button
-            type="button"
-            disabled={isBusy}
-            onClick={() => handleSocialLogin("facebook")}
-            className="club-btn-secondary w-full disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {socialLoading === "facebook" ? "מתחבר..." : "התחבר עם Facebook"}
           </button>
         </div>
         {errors.provider ? (

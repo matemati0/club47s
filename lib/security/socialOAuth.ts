@@ -24,6 +24,16 @@ type ProviderSecrets = {
   clientSecret: string;
 };
 
+type TokenResponse = {
+  access_token?: string;
+};
+
+type GoogleUserInfo = {
+  sub?: string;
+  email?: string;
+  name?: string;
+};
+
 function readFirstEnv(...keys: string[]) {
   for (const key of keys) {
     const value = process.env[key]?.trim();
@@ -34,22 +44,19 @@ function readFirstEnv(...keys: string[]) {
   return "";
 }
 
-function resolveProviderSecrets(provider: SocialProvider): ProviderSecrets {
-  if (provider === "google") {
-    return {
-      clientId: readFirstEnv("GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_CLIENT_ID"),
-      clientSecret: readFirstEnv("GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_CLIENT_SECRET")
-    };
-  }
-
+function resolveGoogleProviderSecrets(): ProviderSecrets {
   return {
-    clientId: readFirstEnv("FACEBOOK_OAUTH_CLIENT_ID", "FACEBOOK_CLIENT_ID"),
-    clientSecret: readFirstEnv("FACEBOOK_OAUTH_CLIENT_SECRET", "FACEBOOK_CLIENT_SECRET")
+    clientId: readFirstEnv("GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_CLIENT_ID"),
+    clientSecret: readFirstEnv("GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_CLIENT_SECRET")
   };
 }
 
 export function isSocialProviderConfigured(provider: SocialProvider) {
-  const { clientId, clientSecret } = resolveProviderSecrets(provider);
+  if (provider !== "google") {
+    return false;
+  }
+
+  const { clientId, clientSecret } = resolveGoogleProviderSecrets();
   return Boolean(clientId && clientSecret);
 }
 
@@ -90,9 +97,7 @@ function normalizeBaseUrl(raw: string) {
 }
 
 function resolveRequestOrigin(request: NextRequest) {
-  const configured = normalizeBaseUrl(
-    readFirstEnv("OAUTH_BASE_URL", "NEXT_PUBLIC_SITE_URL")
-  );
+  const configured = normalizeBaseUrl(readFirstEnv("OAUTH_BASE_URL", "NEXT_PUBLIC_SITE_URL"));
   if (configured) {
     return configured;
   }
@@ -115,30 +120,23 @@ export function buildSocialAuthorizeUrl(
   provider: SocialProvider,
   state: string
 ) {
-  const secrets = resolveProviderSecrets(provider);
+  if (provider !== "google") {
+    return null;
+  }
+
+  const secrets = resolveGoogleProviderSecrets();
   if (!secrets.clientId || !secrets.clientSecret) {
     return null;
   }
 
   const redirectUri = buildSocialCallbackUrl(request, provider);
-
-  if (provider === "google") {
-    const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-    url.searchParams.set("client_id", secrets.clientId);
-    url.searchParams.set("redirect_uri", redirectUri);
-    url.searchParams.set("response_type", "code");
-    url.searchParams.set("scope", "openid email profile");
-    url.searchParams.set("state", state);
-    url.searchParams.set("prompt", "select_account");
-    return url.toString();
-  }
-
-  const url = new URL("https://www.facebook.com/dialog/oauth");
+  const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   url.searchParams.set("client_id", secrets.clientId);
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("response_type", "code");
-  url.searchParams.set("scope", "email,public_profile");
+  url.searchParams.set("scope", "openid email profile");
   url.searchParams.set("state", state);
+  url.searchParams.set("prompt", "select_account");
   return url.toString();
 }
 
@@ -159,7 +157,7 @@ export function decodeOAuthStatePayload(value?: string | null): OAuthStatePayloa
     }
 
     if (
-      (parsed.provider !== "google" && parsed.provider !== "facebook") ||
+      parsed.provider !== "google" ||
       typeof parsed.state !== "string" ||
       typeof parsed.returnTo !== "string" ||
       typeof parsed.createdAt !== "number"
@@ -178,93 +176,36 @@ export function decodeOAuthStatePayload(value?: string | null): OAuthStatePayloa
   }
 }
 
-type TokenResponse = {
-  access_token?: string;
-};
-
-type GoogleUserInfo = {
-  sub?: string;
-  email?: string;
-  name?: string;
-};
-
-type FacebookUserInfo = {
-  id?: string;
-  email?: string;
-  name?: string;
-};
-
 export async function exchangeSocialCodeForProfile(
   request: NextRequest,
   provider: SocialProvider,
   code: string
 ): Promise<SocialProfile | null> {
-  const secrets = resolveProviderSecrets(provider);
+  if (provider !== "google") {
+    return null;
+  }
+
+  const secrets = resolveGoogleProviderSecrets();
   if (!secrets.clientId || !secrets.clientSecret) {
     return null;
   }
 
   const redirectUri = buildSocialCallbackUrl(request, provider);
+  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({
+      code,
+      client_id: secrets.clientId,
+      client_secret: secrets.clientSecret,
+      redirect_uri: redirectUri,
+      grant_type: "authorization_code"
+    }),
+    cache: "no-store"
+  });
 
-  if (provider === "google") {
-    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({
-        code,
-        client_id: secrets.clientId,
-        client_secret: secrets.clientSecret,
-        redirect_uri: redirectUri,
-        grant_type: "authorization_code"
-      }),
-      cache: "no-store"
-    });
-
-    if (!tokenResponse.ok) {
-      return null;
-    }
-
-    const tokenPayload = (await tokenResponse.json().catch(() => null)) as TokenResponse | null;
-    const accessToken = tokenPayload?.access_token;
-    if (!accessToken) {
-      return null;
-    }
-
-    const userInfoResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      },
-      cache: "no-store"
-    });
-
-    if (!userInfoResponse.ok) {
-      return null;
-    }
-
-    const userInfo = (await userInfoResponse.json().catch(() => null)) as GoogleUserInfo | null;
-    const email = userInfo?.email?.trim().toLowerCase();
-    const providerUserId = userInfo?.sub?.trim();
-    if (!email || !providerUserId) {
-      return null;
-    }
-
-    return {
-      provider,
-      providerUserId,
-      email,
-      displayName: userInfo?.name?.trim() || undefined
-    };
-  }
-
-  const tokenUrl = new URL("https://graph.facebook.com/oauth/access_token");
-  tokenUrl.searchParams.set("client_id", secrets.clientId);
-  tokenUrl.searchParams.set("client_secret", secrets.clientSecret);
-  tokenUrl.searchParams.set("redirect_uri", redirectUri);
-  tokenUrl.searchParams.set("code", code);
-
-  const tokenResponse = await fetch(tokenUrl, { cache: "no-store" });
   if (!tokenResponse.ok) {
     return null;
   }
@@ -275,18 +216,20 @@ export async function exchangeSocialCodeForProfile(
     return null;
   }
 
-  const userInfoUrl = new URL("https://graph.facebook.com/me");
-  userInfoUrl.searchParams.set("fields", "id,name,email");
-  userInfoUrl.searchParams.set("access_token", accessToken);
+  const userInfoResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    },
+    cache: "no-store"
+  });
 
-  const userInfoResponse = await fetch(userInfoUrl, { cache: "no-store" });
   if (!userInfoResponse.ok) {
     return null;
   }
 
-  const userInfo = (await userInfoResponse.json().catch(() => null)) as FacebookUserInfo | null;
+  const userInfo = (await userInfoResponse.json().catch(() => null)) as GoogleUserInfo | null;
   const email = userInfo?.email?.trim().toLowerCase();
-  const providerUserId = userInfo?.id?.trim();
+  const providerUserId = userInfo?.sub?.trim();
   if (!email || !providerUserId) {
     return null;
   }

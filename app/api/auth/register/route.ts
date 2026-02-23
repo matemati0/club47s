@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       : debugCode
         ? `שליחת המייל לא זמינה כרגע. ניתן להשתמש בקוד הבדיקה.${emailFailureReasonSuffix}`
         : `שליחת המייל לא זמינה כרגע. נסה שוב בעוד מספר דקות.${emailFailureReasonSuffix}`,
-    debugCode: emailDelivery.sent ? undefined : debugCode
+    debugCode
   });
   response.cookies.set(
     REGISTERED_MEMBER_COOKIE_NAME,

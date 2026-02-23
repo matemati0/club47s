@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const SUPPORTED_SOCIAL_PROVIDERS = ["google", "facebook"] as const;
+const SUPPORTED_SOCIAL_PROVIDERS = ["google"] as const;
 
 function isSupportedSocialProvider(
   value: string

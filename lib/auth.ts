@@ -1,7 +1,7 @@
 import { signJson, verifyJson } from "@/lib/security/signedToken";
 
 export type AuthMode = "guest" | "anonymous" | "member" | "admin";
-export type SocialProvider = "google" | "facebook";
+export type SocialProvider = "google";
 export type TwoFactorTargetMode = "member" | "admin";
 
 export type RegisteredMemberCredentials = {
@@ -197,7 +197,7 @@ export function maskEmail(email: string) {
 }
 
 export function isSupportedSocialProvider(value: string): value is SocialProvider {
-  return value === "google" || value === "facebook";
+  return value === "google";
 }
 
 export function isValidMockMemberCredentials(email: string, password: string) {

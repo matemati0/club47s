@@ -106,9 +106,8 @@ describe("twoFactorVerifySchema", () => {
 });
 
 describe("socialLoginSchema", () => {
-  it("accepts google and facebook", () => {
+  it("accepts google provider", () => {
     expect(socialLoginSchema.safeParse({ provider: "google" }).success).toBe(true);
-    expect(socialLoginSchema.safeParse({ provider: "facebook" }).success).toBe(true);
   });
 
   it("rejects unknown provider", () => {
@@ -160,7 +159,7 @@ describe("two-factor helpers", () => {
   it("masks email and validates social providers", () => {
     expect(maskEmail("member@club47.co.il")).toContain("***");
     expect(isSupportedSocialProvider("google")).toBe(true);
-    expect(isSupportedSocialProvider("facebook")).toBe(true);
+    expect(isSupportedSocialProvider("facebook")).toBe(false);
     expect(isSupportedSocialProvider("twitter")).toBe(false);
   });
 
