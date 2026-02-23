@@ -9,6 +9,7 @@ const child = spawn(
       ...process.env,
       ALLOW_DEBUG_2FA: "true",
       DISABLE_EMAIL_DELIVERY: "true",
+      ALLOW_MOCK_SOCIAL_LOGIN: "true",
       AUTH_COOKIE_SECRET: process.env.AUTH_COOKIE_SECRET || "e2e-secret"
     }
   }

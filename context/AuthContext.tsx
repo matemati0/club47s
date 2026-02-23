@@ -75,6 +75,7 @@ type StepPayload = {
   debugCode?: string;
   message?: string;
   mode?: AuthMode;
+  redirectUrl?: string;
 };
 
 type ParsedStepResult = {
@@ -208,7 +209,7 @@ export function AuthProvider({
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ provider })
+      body: JSON.stringify({ provider, returnTo: "/" })
     });
 
     if (!response.ok) {
@@ -223,7 +224,19 @@ export function AuthProvider({
       });
     }
 
-    setMode("member");
+    const payload = (await response.json().catch(() => null)) as
+      | {
+          mode?: AuthMode;
+          redirectUrl?: string;
+        }
+      | null;
+
+    if (payload?.redirectUrl) {
+      window.location.assign(payload.redirectUrl);
+      return;
+    }
+
+    setMode(payload?.mode === "member" ? "member" : "guest");
   }, []);
 
   const register = useCallback(

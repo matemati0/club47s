@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthActionError, useAuth } from "@/context/AuthContext";
 import type { SocialProvider } from "@/lib/auth";
 import { loginSchema, twoFactorVerifySchema } from "@/lib/validation/auth";
@@ -17,8 +17,33 @@ type FieldErrors = {
 
 type LoginStep = "credentials" | "twoFactor";
 
+function resolveSocialErrorMessage(code: string) {
+  if (code === "unsupported_provider") {
+    return "ספק ההתחברות שנבחר אינו נתמך.";
+  }
+  if (code === "provider_not_configured") {
+    return "התחברות חברתית עדיין לא הוגדרה במערכת.";
+  }
+  if (code === "oauth_denied") {
+    return "התחברות בוטלה על ידי המשתמש.";
+  }
+  if (
+    code === "missing_oauth_code" ||
+    code === "missing_oauth_state" ||
+    code === "expired_oauth_state" ||
+    code === "invalid_oauth_state"
+  ) {
+    return "לא ניתן היה לאמת את ההתחברות החברתית. נסה שוב.";
+  }
+  if (code === "oauth_exchange_failed") {
+    return "התחברות דרך הספק נכשלה. ודא שיש הרשאת אימייל ונסה שוב.";
+  }
+  return "";
+}
+
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, verifyTwoFactor, loginWithSocial, continueAsAnonymous } = useAuth();
   const [step, setStep] = useState<LoginStep>("credentials");
   const [email, setEmail] = useState("");
@@ -30,6 +55,23 @@ export function LoginForm() {
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
+
+  useEffect(() => {
+    const socialError = searchParams.get("socialError");
+    if (!socialError) {
+      return;
+    }
+
+    const message = resolveSocialErrorMessage(socialError);
+    if (!message) {
+      return;
+    }
+
+    setErrors((previous) => ({
+      ...previous,
+      form: message
+    }));
+  }, [searchParams]);
 
   const handleCredentialsSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -118,7 +160,6 @@ export function LoginForm() {
 
     try {
       await loginWithSocial(provider);
-      router.push("/");
     } catch (socialError) {
       if (socialError instanceof AuthActionError) {
         setErrors({
