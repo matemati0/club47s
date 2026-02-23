@@ -44,11 +44,6 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname === "/") {
-    if (mode === "guest") {
-      const loginUrl = new URL("/login", request.url);
-      return applySecurityHeaders(NextResponse.redirect(loginUrl));
-    }
-
     if (mode === "admin") {
       const adminUrl = new URL("/admin", request.url);
       return applySecurityHeaders(NextResponse.redirect(adminUrl));
