@@ -36,12 +36,12 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <p className="club-kicker">MEMBERS ENTRY</p>
+        <p className="club-kicker">כניסת חברים</p>
         <h1 className="mt-4 text-4xl font-medium tracking-wide text-club-white sm:text-5xl">
           כניסה לחברי Club47
         </h1>
         <p className="mt-4 text-base text-club-lightGray sm:text-lg">
-          עמוד הנחיתה הציבורי זמין ב-Home. כאן מתחברים לחשבון החברים עם אימות דו-שלבי.
+          מעמוד זה מתחברים לחשבון החברים עם אימות דו-שלבי וגישה פרטית לאזור המועדון.
         </p>
 
         <div className="mx-auto mt-10 max-w-md">

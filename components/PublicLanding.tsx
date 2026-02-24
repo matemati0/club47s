@@ -67,7 +67,7 @@ export function PublicLanding() {
 
       <section className="grid gap-8 lg:grid-cols-[1.2fr_0.9fr]">
         <article className="club-panel animate-fade p-8 sm:p-10">
-          <p className="club-kicker">PUBLIC LANDING</p>
+          <p className="club-kicker">דף נחיתה ציבורי</p>
           <h1 className="mt-4 text-3xl font-medium leading-tight text-club-white sm:text-5xl">
             Club47 - <strong>ויאגרה</strong> | <strong>קאמגרה</strong> | <strong>סיאליס</strong>
             <span className="mt-2 block text-2xl sm:text-4xl">הגישה הפרטית שלך למה שבאמת עובד</span>
@@ -98,9 +98,9 @@ export function PublicLanding() {
         <section className="club-panel animate-fade p-8 sm:p-10">
           <div className="mb-8 flex justify-between gap-3">
             <div>
-              <p className="club-kicker">GET STARTED</p>
+              <p className="club-kicker">הצטרפות מהירה</p>
               <h2 className="mt-3 text-2xl font-medium text-club-white sm:text-3xl">
-                קודם לנדינג, אחר כך התחברות
+                הרשמה או התחברות לחברים
               </h2>
             </div>
             <button
@@ -113,12 +113,12 @@ export function PublicLanding() {
           </div>
 
           <p className="mb-8 text-sm leading-relaxed text-club-lightGray sm:text-base">
-            זהו עמוד הנחיתה הציבורי. מכאן עוברים להרשמה או למסך התחברות חברים.
+            זהו עמוד הנחיתה הציבורי של Club47. מכאן ממשיכים להרשמה או להתחברות מאובטחת.
           </p>
 
           <div className="grid gap-3">
             <Link href="/register" className="club-btn-primary h-12 px-6 text-base">
-              הרשמה ל-Club47 - גישה פרטית עכשיו
+              הרשמה למועדון - גישה פרטית עכשיו
             </Link>
             <Link href="/login" className="club-btn-secondary h-12 px-6 text-base">
               כניסת חברים
@@ -146,7 +146,7 @@ export function PublicLanding() {
       </section>
 
       <section className="club-panel mt-8 animate-fade p-6 sm:p-8">
-        <p className="club-kicker">SEO ARTICLE</p>
+        <p className="club-kicker">מאמר השוואה</p>
         <h2 className="mt-3 text-2xl font-medium text-club-white sm:text-3xl">
           ויאגרה vs קאמגרה vs סיאליס - מה הכי מתאים לך ב-2026?
         </h2>
@@ -164,4 +164,3 @@ export function PublicLanding() {
     </main>
   );
 }
-

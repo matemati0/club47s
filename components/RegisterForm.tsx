@@ -293,13 +293,13 @@ export function RegisterForm() {
         disabled={isSubmitting}
         className="club-btn-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSubmitting ? "שולח קוד אימות..." : "יצירת חשבון ושליחת קוד"}
+        {isSubmitting ? "שולח קוד אימות..." : "צור חשבון וקבל קוד אימות"}
       </button>
 
       <p className="mt-5 text-center text-sm text-club-lightGray">
         יש לך כבר חשבון?{" "}
         <Link href="/login" className="text-club-white hover:opacity-80">
-          התחבר כאן
+          מעבר למסך התחברות
         </Link>
       </p>
 

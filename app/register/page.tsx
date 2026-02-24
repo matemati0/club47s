@@ -41,12 +41,12 @@ export default function RegisterPage() {
           </button>
         </div>
 
-        <p className="club-kicker">MEMBER REGISTRATION</p>
+        <p className="club-kicker">הרשמה למועדון</p>
         <h1 className="mt-4 text-4xl font-medium tracking-wide text-club-white sm:text-5xl">
           הרשמה למועדון
         </h1>
         <p className="mt-4 text-base text-club-lightGray sm:text-lg">
-          צור משתמש חדש ואשר הרשמה עם קוד אימות לאימייל
+          פתח חשבון חדש ואמת את ההרשמה באמצעות קוד אימות שנשלח לאימייל.
         </p>
 
         <div className="mx-auto mt-10 max-w-md">

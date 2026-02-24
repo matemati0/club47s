@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
           </button>
         </div>
 
-        <p className="club-kicker">ADMIN ACCESS</p>
+        <p className="club-kicker">כניסת מנהל</p>
         <h1 className="mt-4 text-4xl font-medium tracking-wide text-club-white sm:text-5xl">
           כניסת מנהל
         </h1>

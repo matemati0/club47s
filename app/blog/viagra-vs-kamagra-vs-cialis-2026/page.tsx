@@ -36,7 +36,7 @@ export default function ComparisonArticlePage() {
       />
 
       <article className="club-panel animate-fade p-8 sm:p-10">
-        <p className="club-kicker">BLOG ARTICLE</p>
+        <p className="club-kicker">מאמר בלוג</p>
         <h1 className="mt-4 text-3xl font-medium leading-tight text-club-white sm:text-5xl">
           <strong>ויאגרה</strong> vs <strong>קאמגרה</strong> vs <strong>סיאליס</strong> - מה הכי
           מתאים לך ב-2026?

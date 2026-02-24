@@ -251,7 +251,7 @@ export function LoginForm() {
             disabled={isBusy}
             className="club-btn-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "שולח קוד אימות..." : "התחבר עם אימייל"}
+            {isSubmitting ? "שולח קוד אימות..." : "שלח קוד והמשך להתחברות"}
           </button>
         </form>
       ) : (
@@ -326,7 +326,7 @@ export function LoginForm() {
 
       <div className="mt-6 border-t border-club-darkGray pt-5">
         <p className="text-center text-xs tracking-[0.16em] text-club-lightGray">
-          כניסה מהירה
+          התחברות חברתית
         </p>
         <div className="mt-3 grid gap-3">
           <button
@@ -335,7 +335,7 @@ export function LoginForm() {
             onClick={() => handleSocialLogin("google")}
             className="club-btn-secondary w-full disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {socialLoading === "google" ? "מתחבר..." : "התחבר עם Gmail"}
+            {socialLoading === "google" ? "מתחבר..." : "התחברות עם Google"}
           </button>
         </div>
         {errors.provider ? (
@@ -346,14 +346,14 @@ export function LoginForm() {
       <p className="mt-5 text-center text-sm text-club-lightGray">
         אין לך חשבון?{" "}
         <Link href="/register" className="text-club-white hover:opacity-80">
-          להרשמה
+          להרשמה מהירה
         </Link>
       </p>
 
       <p className="mt-3 text-center text-xs text-club-lightGray">
-        גישת מנהל?{" "}
+        כניסת מנהל?{" "}
         <Link href="/admin/login" className="text-club-white hover:opacity-80">
-          כניסה לפאנל אדמין
+          מעבר לפאנל ניהול
         </Link>
       </p>
 
@@ -362,7 +362,7 @@ export function LoginForm() {
         onClick={handleAnonymousAccess}
         className="club-btn-secondary mt-4 h-12 w-full text-base text-club-lightGray hover:text-club-white"
       >
-        המשך כאנונימי
+        המשך לצפייה אנונימית
       </button>
 
       <p className="mt-4 text-center text-xs leading-relaxed text-club-lightGray">

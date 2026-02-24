@@ -11,7 +11,7 @@ export default function TermsOfUsePage() {
   return (
     <main className="club-shell py-10 sm:py-14">
       <section className="club-panel p-6 sm:p-10">
-        <p className="club-kicker">TERMS OF USE</p>
+        <p className="club-kicker">תנאי שימוש</p>
         <h1 className="mt-4 text-3xl font-medium text-club-white sm:text-4xl">
           תנאי שימוש ורכישה
         </h1>

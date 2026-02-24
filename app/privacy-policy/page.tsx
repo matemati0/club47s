@@ -11,7 +11,7 @@ export default function PrivacyPolicyPage() {
   return (
     <main className="club-shell py-10 sm:py-14">
       <section className="club-panel p-6 sm:p-10">
-        <p className="club-kicker">PRIVACY POLICY</p>
+        <p className="club-kicker">מדיניות פרטיות</p>
         <h1 className="mt-4 text-3xl font-medium text-club-white sm:text-4xl">מדיניות פרטיות</h1>
         <p className="mt-3 text-sm text-club-lightGray">עדכון אחרון: {LEGAL_LAST_UPDATED}</p>
 

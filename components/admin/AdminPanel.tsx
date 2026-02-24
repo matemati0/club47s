@@ -220,7 +220,7 @@ export function AdminPanel() {
       <header className="sticky top-0 z-50 border-b border-club-darkGray bg-club-black/95 backdrop-blur">
         <div className="club-shell flex min-h-[84px] items-center justify-between gap-4 py-3">
           <div>
-            <p className="club-kicker">ADMIN CONSOLE</p>
+            <p className="club-kicker">מערכת ניהול</p>
             <h1 className="mt-1 text-xl font-medium tracking-wide">פאנל ניהול מלא</h1>
           </div>
           <div className="flex items-center gap-2">

@@ -11,7 +11,7 @@ export default function KamagraPage() {
   return (
     <main className="club-shell py-10 sm:py-14">
       <article className="club-panel animate-fade p-8 sm:p-10">
-        <p className="club-kicker">PRODUCT PAGE</p>
+        <p className="club-kicker">עמוד מוצר</p>
         <h1 className="mt-4 text-3xl font-medium text-club-white sm:text-5xl">
           <strong>קאמגרה</strong> - הג׳לי והמדבקות שפועלים מהר
         </h1>
@@ -39,8 +39,8 @@ export default function KamagraPage() {
           <Link href="/register" className="club-btn-primary h-12 px-6 text-base">
             הרשמה למועדון
           </Link>
-          <Link href="/login" className="club-btn-secondary h-12 px-6 text-base">
-            חזרה לעמוד הראשי
+          <Link href="/" className="club-btn-secondary h-12 px-6 text-base">
+            חזרה לדף הבית
           </Link>
         </div>
 
