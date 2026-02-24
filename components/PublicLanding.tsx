@@ -21,6 +21,24 @@ const productHighlights = [
   }
 ];
 
+const landingImageSlots = [
+  {
+    id: "hero-main",
+    title: "תמונה ראשית",
+    subtitle: "Hero Image"
+  },
+  {
+    id: "hero-secondary",
+    title: "תמונת אווירה",
+    subtitle: "Lifestyle Image"
+  },
+  {
+    id: "hero-product",
+    title: "תמונת מוצר",
+    subtitle: "Product Close-up"
+  }
+];
+
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -93,6 +111,26 @@ export function PublicLanding() {
               ביטחון ספונטני בלי לחץ של תזמון.
             </li>
           </ul>
+
+          <div className="mt-8">
+            <p className="text-xs tracking-[0.16em] text-club-lightGray">מקומות לתמונות בדף הנחיתה</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {landingImageSlots.map((slot) => (
+                <figure
+                  key={slot.id}
+                  data-slot={slot.id}
+                  className="club-card overflow-hidden"
+                >
+                  <div className="flex aspect-[4/3] items-center justify-center border border-dashed border-club-darkGray bg-club-panel text-center">
+                    <div>
+                      <p className="text-sm font-medium text-club-white">{slot.title}</p>
+                      <p className="mt-1 text-xs text-club-lightGray">{slot.subtitle}</p>
+                    </div>
+                  </div>
+                </figure>
+              ))}
+            </div>
+          </div>
         </article>
 
         <section className="club-panel animate-fade p-8 sm:p-10">
@@ -134,6 +172,15 @@ export function PublicLanding() {
       <section className="mt-8 grid gap-4 sm:grid-cols-3">
         {productHighlights.map((item) => (
           <article key={item.title} className="club-card p-5 sm:p-6">
+            <div
+              data-slot={`card-image-${item.href.replace("/", "")}`}
+              className="mb-4 flex aspect-[4/3] items-center justify-center rounded-lg border border-dashed border-club-darkGray bg-club-panel text-center"
+            >
+              <div>
+                <p className="text-sm font-medium text-club-white">מקום לתמונה</p>
+                <p className="mt-1 text-xs text-club-lightGray">{item.title}</p>
+              </div>
+            </div>
             <h2 className="text-xl font-medium text-club-white">
               <strong>{item.title}</strong>
             </h2>
