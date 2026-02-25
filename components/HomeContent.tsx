@@ -488,7 +488,7 @@ function StoreCatalog({ mode }: { mode: StoreMode }) {
       <div
         className={`fixed inset-x-0 bottom-0 z-40 border-t border-club-darkGray bg-club-black/95 backdrop-blur lg:hidden ${
           isCartOpen ? "hidden" : ""
-        }`}
+        } pb-[env(safe-area-inset-bottom)]`}
       >
         <div className="club-shell flex items-center justify-between gap-4 py-3">
           <div className="text-right">

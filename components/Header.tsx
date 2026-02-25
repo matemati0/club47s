@@ -23,17 +23,19 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-club-darkGray bg-club-black/95 backdrop-blur">
-      <div className="club-shell flex h-[74px] items-center justify-between">
-        <div>
-          <p className="club-kicker">מועדון חברים פרטי</p>
-          <h1 className="mt-1 text-sm font-medium tracking-[0.28em] text-club-white">מועדון 47</h1>
+      <div className="club-shell flex flex-wrap items-center justify-between gap-3 py-3 sm:min-h-[74px]">
+        <div className="min-w-0">
+          <p className="club-kicker whitespace-nowrap">מועדון חברים פרטי</p>
+          <h1 className="mt-1 text-xs font-medium tracking-[0.2em] text-club-white sm:text-sm sm:tracking-[0.28em]">
+            מועדון 47
+          </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={toggleTheme}
-            className="rounded-lg border border-club-darkGray px-4 py-2 text-sm text-club-lightGray hover:border-club-white hover:text-club-white"
+            className="rounded-lg border border-club-darkGray px-3 py-2 text-xs text-club-lightGray hover:border-club-white hover:text-club-white sm:px-4 sm:text-sm"
           >
             {nextThemeLabel}
           </button>
@@ -42,7 +44,7 @@ export function Header() {
             <button
               type="button"
               onClick={handleExit}
-              className="rounded-lg border border-club-darkGray px-4 py-2 text-sm text-club-lightGray hover:border-club-white hover:text-club-white"
+              className="rounded-lg border border-club-darkGray px-3 py-2 text-xs text-club-lightGray hover:border-club-white hover:text-club-white sm:px-4 sm:text-sm"
             >
               {isAnonymous ? "כניסת חברים" : isAdmin ? "יציאת אדמין" : "יציאה"}
             </button>

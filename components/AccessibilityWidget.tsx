@@ -79,7 +79,7 @@ export function AccessibilityWidget() {
   }
 
   return (
-    <div className="fixed bottom-24 right-4 z-[72] sm:bottom-6">
+    <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-[72] sm:bottom-[calc(1.5rem+env(safe-area-inset-bottom))]">
       {isOpen ? (
         <section
           className="mb-3 w-[min(92vw,320px)] rounded-2xl border border-club-darkGray bg-club-panel/95 p-4 shadow-2xl backdrop-blur"

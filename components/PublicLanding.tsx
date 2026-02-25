@@ -67,7 +67,7 @@ export function PublicLanding() {
     theme === "dark" ? "למצב יום" : theme === "light" ? "למצב סגול" : "למצב לילה";
 
   return (
-    <main className="club-shell py-8 sm:py-12">
+    <main className="club-shell py-6 sm:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -106,7 +106,7 @@ export function PublicLanding() {
         </article>
 
         <section className="club-panel animate-fade p-8 sm:p-10">
-          <div className="mb-8 flex justify-between gap-3">
+          <div className="mb-8 flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="club-kicker">הצטרפות מהירה</p>
               <h2 className="mt-3 text-2xl font-medium text-club-white sm:text-3xl">
@@ -116,7 +116,7 @@ export function PublicLanding() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="h-fit rounded-lg border border-club-darkGray px-4 py-2 text-sm text-club-lightGray hover:border-club-white hover:text-club-white"
+              className="h-fit rounded-lg border border-club-darkGray px-3 py-2 text-xs text-club-lightGray hover:border-club-white hover:text-club-white sm:px-4 sm:text-sm"
             >
               {nextThemeLabel}
             </button>

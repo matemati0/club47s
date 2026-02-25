@@ -32,7 +32,7 @@ export function CookieConsentBanner() {
 
   return (
     <aside
-      className="fixed bottom-4 left-4 right-4 z-[70] rounded-xl border border-club-darkGray bg-club-panel/95 p-4 shadow-2xl backdrop-blur md:left-auto md:max-w-md"
+      className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 z-[70] rounded-xl border border-club-darkGray bg-club-panel/95 p-4 shadow-2xl backdrop-blur md:left-auto md:max-w-md"
       role="dialog"
       aria-live="polite"
       aria-label="העדפות קוקיז"

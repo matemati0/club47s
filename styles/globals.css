@@ -139,7 +139,7 @@
 
 @layer components {
   .club-shell {
-    @apply mx-auto w-full max-w-6xl px-6;
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
   }
 
   .club-panel {
@@ -157,7 +157,7 @@
   }
 
   .club-kicker {
-    @apply text-[11px] tracking-[0.32em] text-club-lightGray;
+    @apply text-[10px] tracking-[0.26em] text-club-lightGray sm:text-[11px] sm:tracking-[0.32em];
   }
 
   .club-title {
@@ -204,16 +204,16 @@
   }
 
   .landing-3d-stage {
-    --landing-3d-depth: 126px;
+    --landing-3d-depth: 96px;
     position: relative;
-    height: clamp(210px, 52vw, 280px);
+    height: clamp(170px, 52vw, 240px);
     perspective: 1100px;
     perspective-origin: center;
   }
 
   @media (min-width: 640px) {
     .landing-3d-stage {
-      --landing-3d-depth: 160px;
+      --landing-3d-depth: 150px;
       height: clamp(250px, 36vw, 320px);
     }
   }
