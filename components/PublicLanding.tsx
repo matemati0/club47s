@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Landing3DShowcase } from "@/components/Landing3DShowcase";
 import { useTheme } from "@/context/ThemeContext";
 
 const productHighlights = [
@@ -25,30 +26,6 @@ const productHighlights = [
     href: "/cialis",
     imageSrc: "/landing/cialis-5mg-uk.jpg",
     imageAlt: "אריזת Cialis 5mg"
-  }
-];
-
-const landingImageSlots = [
-  {
-    id: "hero-main",
-    title: "תמונה ראשית",
-    subtitle: "ויאגרה",
-    src: "/landing/viagra-tablette.jpg",
-    alt: "מוצר ויאגרה"
-  },
-  {
-    id: "hero-secondary",
-    title: "תמונת מוצר",
-    subtitle: "קאמגרה",
-    src: "/landing/kamagra-front100mg.jpg",
-    alt: "אריזת קאמגרה"
-  },
-  {
-    id: "hero-product",
-    title: "תמונת מוצר",
-    subtitle: "סיאליס",
-    src: "/landing/cialis-5mg-uk.jpg",
-    alt: "אריזת סיאליס"
   }
 ];
 
@@ -125,31 +102,7 @@ export function PublicLanding() {
             </li>
           </ul>
 
-          <div className="mt-8">
-            <p className="text-xs tracking-[0.16em] text-club-lightGray">מקומות לתמונות בדף הנחיתה</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              {landingImageSlots.map((slot) => (
-                <figure
-                  key={slot.id}
-                  data-slot={slot.id}
-                  className="club-card overflow-hidden"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-club-darkGray bg-club-panel">
-                    <Image
-                      src={slot.src}
-                      alt={slot.alt}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 33vw"
-                      className="object-cover"
-                    />
-                    <figcaption className="absolute inset-x-0 bottom-0 bg-club-black/70 px-3 py-2 text-xs text-club-lightGray">
-                      {slot.title}: {slot.subtitle}
-                    </figcaption>
-                  </div>
-                </figure>
-              ))}
-            </div>
-          </div>
+          <Landing3DShowcase />
         </article>
 
         <section className="club-panel animate-fade p-8 sm:p-10">
