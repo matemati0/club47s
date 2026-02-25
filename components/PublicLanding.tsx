@@ -58,9 +58,9 @@ const blogHighlights = [
 ];
 
 const landingBackgrounds = [
-  "/landing/bg-landing-1.jpg",
-  "/landing/bg-landing-2.jpg",
-  "/landing/bg-landing-3.jpg"
+  "/landing/public-bg-1.jpg",
+  "/landing/public-bg-2.jpg",
+  "/landing/public-bg-3.jpg"
 ];
 
 const BACKGROUND_ROTATION_MS = 5500;
