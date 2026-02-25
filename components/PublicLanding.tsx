@@ -29,6 +29,33 @@ const productHighlights = [
   }
 ];
 
+const blogHighlights = [
+  {
+    title: "איך לדעת אם מוצר מזויף או לא",
+    description:
+      "מדריך זיהוי מהיר: אריזה, מספר אצווה, תאריך תוקף, מקור רכישה ומחיר חשוד.",
+    href: "/blog/how-to-spot-fake-product-2026"
+  },
+  {
+    title: "ויאגרה vs קאמגרה vs סיאליס - השוואה ל-2026",
+    description:
+      "השוואה מרוכזת בין שלושת המוצרים לפי זמן פעולה, נוחות שימוש ועלות.",
+    href: "/blog/viagra-vs-kamagra-vs-cialis-2026"
+  },
+  {
+    title: "צ׳ק ליסט להזמנה דיסקרטית בטוחה",
+    description:
+      "רשימת בדיקה קצרה לפני הזמנה: פרטי עסק, מדיניות, אריזה ותיעוד הזמנה.",
+    href: "/blog/discreet-ordering-safety-checklist-2026"
+  },
+  {
+    title: "שאלות נפוצות לפני הזמנה ראשונה",
+    description:
+      "תשובות מהירות לשאלות הנפוצות ביותר לפני התחברות, הרשמה והזמנה.",
+    href: "/blog/first-order-faq-2026"
+  }
+];
+
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -168,20 +195,50 @@ export function PublicLanding() {
       </section>
 
       <section className="club-panel mt-8 animate-fade p-6 sm:p-8">
-        <p className="club-kicker">מאמר השוואה</p>
+        <p className="club-kicker">מדריך חשוב</p>
         <h2 className="mt-3 text-2xl font-medium text-club-white sm:text-3xl">
-          ויאגרה vs קאמגרה vs סיאליס - מה הכי מתאים לך ב-2026?
+          איך לדעת אם מוצר מזויף או לא?
         </h2>
         <p className="mt-4 max-w-3xl text-sm leading-relaxed text-club-lightGray sm:text-base">
-          מדריך השוואה מהיר בין <strong>ויאגרה</strong>, <strong>קאמגרה</strong> ו-
-          <strong>סיאליס</strong>: זמני פעולה, התאמה לאורח חיים, טווחי מחירים ויתרונות מרכזיים.
+          לפני כל רכישה, חשוב לבדוק סימנים בסיסיים שיכולים להצביע על מוצר מזויף. הנה רשימת בדיקה
+          קצרה:
         </p>
+
+        <ul className="mt-4 list-disc space-y-2 pr-5 text-sm text-club-lightGray sm:text-base">
+          <li>האריזה מודפסת באיכות נמוכה, עם שגיאות כתיב או מדבקות לא אחידות.</li>
+          <li>אין מספר אצווה ברור, תאריך תוקף תקין או פרטי יצרן מזוהים.</li>
+          <li>צורת הטבליה/צבע/ריח שונים משמעותית מהתיאור הרשמי.</li>
+          <li>המחיר נמוך בצורה חריגה או שיש לחץ לקנייה מהירה ללא מידע שקוף.</li>
+          <li>אין פרטי עסק מלאים, מדיניות ברורה או מענה שירות מסודר.</li>
+        </ul>
+
         <Link
-          href="/blog/viagra-vs-kamagra-vs-cialis-2026"
+          href="/blog/how-to-spot-fake-product-2026"
           className="club-btn-secondary mt-6 h-11 w-fit px-5"
         >
-          לקריאת המאמר המלא
+          לקריאת המדריך המלא
         </Link>
+      </section>
+
+      <section className="club-panel mt-8 animate-fade p-6 sm:p-8">
+        <p className="club-kicker">מאמרים ובלוג</p>
+        <h2 className="mt-3 text-2xl font-medium text-club-white sm:text-3xl">
+          עוד מדריכים חשובים לקריאה לפני הזמנה
+        </h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {blogHighlights.map((article) => (
+            <article key={article.href} className="club-card p-5 sm:p-6">
+              <h3 className="text-lg font-medium text-club-white">{article.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-club-lightGray">{article.description}</p>
+              <Link
+                href={article.href}
+                className="mt-5 inline-flex text-sm text-club-white hover:opacity-80"
+              >
+                המשך לקריאת המאמר
+              </Link>
+            </article>
+          ))}
+        </div>
       </section>
     </main>
   );
