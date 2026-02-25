@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -7,17 +8,23 @@ const productHighlights = [
   {
     title: "ויאגרה",
     description: "ויאגרה גנרית (סילדנפיל) לזמן תגובה מהיר וביצועים חזקים.",
-    href: "/viagra"
+    href: "/viagra",
+    imageSrc: "/landing/viagra-tablette.jpg",
+    imageAlt: "מוצר ויאגרה על רקע לבן"
   },
   {
     title: "קאמגרה",
     description: "קאמגרה ג׳לי ומדבקות לספיגה מהירה, נוחות מלאה ודיסקרטיות.",
-    href: "/kamagra"
+    href: "/kamagra",
+    imageSrc: "/landing/kamagra-front100mg.jpg",
+    imageAlt: "אריזת Kamagra 100mg"
   },
   {
     title: "סיאליס",
     description: "סיאליס גנרי (טדלפיל) לעד 36 שעות של ביטחון וגמישות.",
-    href: "/cialis"
+    href: "/cialis",
+    imageSrc: "/landing/cialis-5mg-uk.jpg",
+    imageAlt: "אריזת Cialis 5mg"
   }
 ];
 
@@ -25,17 +32,23 @@ const landingImageSlots = [
   {
     id: "hero-main",
     title: "תמונה ראשית",
-    subtitle: "Hero Image"
+    subtitle: "ויאגרה",
+    src: "/landing/viagra-tablette.jpg",
+    alt: "מוצר ויאגרה"
   },
   {
     id: "hero-secondary",
-    title: "תמונת אווירה",
-    subtitle: "Lifestyle Image"
+    title: "תמונת מוצר",
+    subtitle: "קאמגרה",
+    src: "/landing/kamagra-front100mg.jpg",
+    alt: "אריזת קאמגרה"
   },
   {
     id: "hero-product",
     title: "תמונת מוצר",
-    subtitle: "Product Close-up"
+    subtitle: "סיאליס",
+    src: "/landing/cialis-5mg-uk.jpg",
+    alt: "אריזת סיאליס"
   }
 ];
 
@@ -121,11 +134,17 @@ export function PublicLanding() {
                   data-slot={slot.id}
                   className="club-card overflow-hidden"
                 >
-                  <div className="flex aspect-[4/3] items-center justify-center border border-dashed border-club-darkGray bg-club-panel text-center">
-                    <div>
-                      <p className="text-sm font-medium text-club-white">{slot.title}</p>
-                      <p className="mt-1 text-xs text-club-lightGray">{slot.subtitle}</p>
-                    </div>
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-club-darkGray bg-club-panel">
+                    <Image
+                      src={slot.src}
+                      alt={slot.alt}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                      className="object-cover"
+                    />
+                    <figcaption className="absolute inset-x-0 bottom-0 bg-club-black/70 px-3 py-2 text-xs text-club-lightGray">
+                      {slot.title}: {slot.subtitle}
+                    </figcaption>
                   </div>
                 </figure>
               ))}
@@ -174,12 +193,15 @@ export function PublicLanding() {
           <article key={item.title} className="club-card p-5 sm:p-6">
             <div
               data-slot={`card-image-${item.href.replace("/", "")}`}
-              className="mb-4 flex aspect-[4/3] items-center justify-center rounded-lg border border-dashed border-club-darkGray bg-club-panel text-center"
+              className="relative mb-4 aspect-[4/3] overflow-hidden rounded-lg border border-club-darkGray bg-club-panel"
             >
-              <div>
-                <p className="text-sm font-medium text-club-white">מקום לתמונה</p>
-                <p className="mt-1 text-xs text-club-lightGray">{item.title}</p>
-              </div>
+              <Image
+                src={item.imageSrc}
+                alt={item.imageAlt}
+                fill
+                sizes="(max-width: 640px) 100vw, 33vw"
+                className="object-cover"
+              />
             </div>
             <h2 className="text-xl font-medium text-club-white">
               <strong>{item.title}</strong>
