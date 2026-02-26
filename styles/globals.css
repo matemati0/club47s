@@ -275,11 +275,11 @@
 
   .landing-hero-bg-layer {
     position: absolute;
-    inset: -4%;
+    inset: 0;
     background-size: cover;
     background-position: center;
     opacity: 0;
-    transform: scale(1.04);
+    transform: scale(1.02);
     transition:
       opacity 850ms ease,
       transform 5500ms ease;
@@ -288,16 +288,16 @@
 
   .landing-hero-bg-layer[data-active="true"] {
     opacity: 1;
-    transform: scale(1.12);
+    transform: scale(1.08);
   }
 
   .landing-hero-bg-mask {
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(circle at 18% 20%, rgb(0 0 0 / 0.26), transparent 44%),
-      radial-gradient(circle at 82% 22%, rgb(0 0 0 / 0.26), transparent 48%),
-      linear-gradient(180deg, rgb(0 0 0 / 0.56), rgb(0 0 0 / 0.68));
+      radial-gradient(circle at 18% 20%, rgb(0 0 0 / 0.18), transparent 44%),
+      radial-gradient(circle at 82% 22%, rgb(0 0 0 / 0.18), transparent 48%),
+      linear-gradient(180deg, rgb(0 0 0 / 0.34), rgb(0 0 0 / 0.52));
   }
 }
 

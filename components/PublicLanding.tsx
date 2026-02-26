@@ -153,13 +153,13 @@ export function PublicLanding() {
   }, [autoRotateBackground]);
 
   return (
-    <main className="relative overflow-hidden">
+    <main className="relative isolate overflow-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
         {landingBackgrounds.map((backgroundSrc, index) => (
           <div
             key={backgroundSrc}
@@ -171,7 +171,7 @@ export function PublicLanding() {
         <div className="landing-hero-bg-mask" />
       </div>
 
-      <div className="club-shell py-6 sm:py-12">
+      <div className="relative z-10 club-shell py-6 sm:py-12">
         <section className="grid gap-8 lg:grid-cols-[1.2fr_0.9fr]">
           <article className="club-panel animate-fade p-8 sm:p-10">
           <p className="club-kicker">דף נחיתה ציבורי</p>
