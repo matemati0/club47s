@@ -58,7 +58,7 @@ function applyProductPatch(existing: Product, patch: unknown): Product {
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await isAdminRequest(request))) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -69,7 +69,7 @@ export async function PATCH(
     return originRejection;
   }
 
-  const id = params.id;
+  const { id } = await params;
   const body = (await request.json().catch(() => null)) as unknown;
 
   const products = await readProducts();
@@ -101,7 +101,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await isAdminRequest(request))) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -112,7 +112,7 @@ export async function DELETE(
     return originRejection;
   }
 
-  const id = params.id;
+  const { id } = await params;
   const products = await readProducts();
   const index = products.findIndex((product) => product.id === id);
   if (index < 0) {

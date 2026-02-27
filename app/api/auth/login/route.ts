@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   }
 
   const rateLimitKey = getLoginRateLimitKey(request);
-  const blockedState = getLoginBlockState(rateLimitKey);
+  const blockedState = await getLoginBlockState(rateLimitKey);
   if (blockedState.blocked) {
     return jsonRateLimitResponse(blockedState.retryAfterSeconds);
   }
@@ -59,10 +59,10 @@ export async function POST(request: NextRequest) {
   const parsed = loginSchema.safeParse(body);
 
   if (!parsed.success) {
-    const failureState = registerFailedLoginAttempt(rateLimitKey);
+    const failureState = await registerFailedLoginAttempt(rateLimitKey);
     await applyDelay(failureState.delayMs);
 
-    const nextBlockedState = getLoginBlockState(rateLimitKey);
+    const nextBlockedState = await getLoginBlockState(rateLimitKey);
     if (nextBlockedState.blocked) {
       return jsonRateLimitResponse(nextBlockedState.retryAfterSeconds);
     }
@@ -86,10 +86,10 @@ export async function POST(request: NextRequest) {
   );
 
   if (!memberCredentialsValid) {
-    const failureState = registerFailedLoginAttempt(rateLimitKey);
+    const failureState = await registerFailedLoginAttempt(rateLimitKey);
     await applyDelay(failureState.delayMs);
 
-    const nextBlockedState = getLoginBlockState(rateLimitKey);
+    const nextBlockedState = await getLoginBlockState(rateLimitKey);
     if (nextBlockedState.blocked) {
       return jsonRateLimitResponse(nextBlockedState.retryAfterSeconds);
     }
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  clearFailedLoginAttempts(rateLimitKey);
+  await clearFailedLoginAttempts(rateLimitKey);
 
   const code = generateTwoFactorCode();
   const expiresAt = Date.now() + TWO_FACTOR_COOKIE_MAX_AGE * 1000;
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     return response;
   }
 
-  const challenge = createTwoFactorChallenge({
+  const challenge = await createTwoFactorChallenge({
     email: parsed.data.email,
     code,
     expiresAt,

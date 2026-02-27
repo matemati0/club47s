@@ -42,9 +42,10 @@ function redirectToLogin(request: NextRequest, socialError: string) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { provider: string } }
+  { params }: { params: Promise<{ provider: string }> }
 ) {
-  const providerParam = params.provider.trim().toLowerCase();
+  const { provider } = await params;
+  const providerParam = provider.trim().toLowerCase();
   if (!isSupportedSocialProvider(providerParam)) {
     return redirectToLogin(request, "unsupported_provider");
   }

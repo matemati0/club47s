@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     return response;
   }
 
-  const challenge = createTwoFactorChallenge({
+  const challenge = await createTwoFactorChallenge({
     email: parsed.data.email,
     code,
     registrationPasswordHash,

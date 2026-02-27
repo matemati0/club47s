@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
   }
 
   const challengeId = request.cookies.get(TWO_FACTOR_COOKIE_NAME)?.value;
-  const meta = challengeId ? getTwoFactorChallengeMeta(challengeId) : null;
+  const meta = challengeId ? await getTwoFactorChallengeMeta(challengeId) : null;
   const rateLimitKey = getTwoFactorRateLimitKey(request, meta?.email);
 
-  const blockedState = getLoginBlockState(rateLimitKey);
+  const blockedState = await getLoginBlockState(rateLimitKey);
   if (blockedState.blocked) {
     return jsonRateLimitResponse(blockedState.retryAfterSeconds);
   }
@@ -67,10 +67,10 @@ export async function POST(request: NextRequest) {
   const parsed = twoFactorVerifySchema.safeParse(body);
 
   if (!parsed.success) {
-    const failureState = registerFailedLoginAttempt(rateLimitKey);
+    const failureState = await registerFailedLoginAttempt(rateLimitKey);
     await applyDelay(failureState.delayMs);
 
-    const nextBlockedState = getLoginBlockState(rateLimitKey);
+    const nextBlockedState = await getLoginBlockState(rateLimitKey);
     if (nextBlockedState.blocked) {
       return jsonRateLimitResponse(nextBlockedState.retryAfterSeconds);
     }
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!challengeId || !meta) {
-    const failureState = registerFailedLoginAttempt(rateLimitKey);
+    const failureState = await registerFailedLoginAttempt(rateLimitKey);
     await applyDelay(failureState.delayMs);
 
     const response = NextResponse.json(
@@ -101,12 +101,12 @@ export async function POST(request: NextRequest) {
     return response;
   }
 
-  const verification = verifyAndConsumeTwoFactorChallenge(challengeId, parsed.data.code);
+  const verification = await verifyAndConsumeTwoFactorChallenge(challengeId, parsed.data.code);
   if (!verification.ok) {
-    const failureState = registerFailedLoginAttempt(rateLimitKey);
+    const failureState = await registerFailedLoginAttempt(rateLimitKey);
     await applyDelay(failureState.delayMs);
 
-    const nextBlockedState = getLoginBlockState(rateLimitKey);
+    const nextBlockedState = await getLoginBlockState(rateLimitKey);
     if (nextBlockedState.blocked) {
       return jsonRateLimitResponse(nextBlockedState.retryAfterSeconds);
     }
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  clearFailedLoginAttempts(rateLimitKey);
+  await clearFailedLoginAttempts(rateLimitKey);
   const resolvedMode = verification.targetMode === "admin" ? "admin" : "member";
 
   if (

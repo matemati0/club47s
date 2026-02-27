@@ -29,7 +29,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const initialMode = await resolveAuthMode(cookieStore.get(AUTH_COOKIE_NAME)?.value);
 
   return (
