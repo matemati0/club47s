@@ -28,3 +28,8 @@ pnpm-debug.log*
 next-env.d.ts
 
 .vercel
+
+# local sqlite database
+/data/products.db
+/data/products.db-shm
+/data/products.db-wal
