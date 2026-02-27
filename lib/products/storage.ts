@@ -3,7 +3,10 @@ import "server-only";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
+import { Pool, type PoolConfig } from "pg";
 import { Product, ProductOption, ProductStatus } from "@/lib/products/types";
+
+type DbProvider = "postgres" | "sqlite";
 
 type SqliteStatement = {
   all: (...params: unknown[]) => unknown[];
@@ -17,35 +20,12 @@ type SqliteDatabase = {
   exec: (sql: string) => void;
   prepare: (sql: string) => SqliteStatement;
   transaction: SqliteTransactionFactory;
+  close?: () => void;
 };
 
 type SqliteDatabaseCtor = new (filename: string) => SqliteDatabase;
 
-const require = createRequire(import.meta.url);
-const { DatabaseSync } = require("node:sqlite") as {
-  DatabaseSync: SqliteDatabaseCtor;
-};
-
-const LEGACY_PRODUCTS_FILE_PATH = path.join(process.cwd(), "data", "products.json");
-const DEFAULT_PRODUCTS_DB_PATH = path.join(process.cwd(), "data", "products.db");
-
-function resolveProductsDbPath() {
-  const configured = process.env.PRODUCTS_DB_PATH?.trim();
-  if (!configured) {
-    return DEFAULT_PRODUCTS_DB_PATH;
-  }
-
-  return path.isAbsolute(configured)
-    ? configured
-    : path.join(process.cwd(), configured);
-}
-
-const PRODUCTS_DB_PATH = resolveProductsDbPath();
-
-let database: SqliteDatabase | null = null;
-let initializationPromise: Promise<void> | null = null;
-
-type ProductRow = {
+type SqliteProductRow = {
   id: string;
   section: string;
   name: string;
@@ -59,13 +39,132 @@ type ProductRow = {
   sort_order: number | null;
 };
 
-function getDatabase() {
-  if (database) {
-    return database;
+type PostgresProductRow = {
+  id: string;
+  section: string;
+  name: string;
+  details_json: unknown;
+  options_json: unknown;
+  image_src: string | null;
+  image_alt: string | null;
+  stock: number;
+  status: string;
+  updated_at: Date | string;
+};
+
+const LEGACY_PRODUCTS_FILE_PATH = path.join(process.cwd(), "data", "products.json");
+const DEFAULT_SQLITE_DB_PATH = path.join(process.cwd(), "data", "products.db");
+const SQLITE_DB_PATH = resolveSqliteDbPath();
+const PRODUCTS_DATABASE_URL = resolveProductsDatabaseUrl();
+const PRODUCTS_DB_PROVIDER = resolveProductsDbProvider();
+
+let sqliteCtor: SqliteDatabaseCtor | null = null;
+let sqliteDatabase: SqliteDatabase | null = null;
+let sqliteInitializationPromise: Promise<void> | null = null;
+let postgresInitializationPromise: Promise<void> | null = null;
+
+if (process.env.NODE_ENV === "production" && PRODUCTS_DB_PROVIDER === "sqlite") {
+  console.warn(
+    "[products] Using SQLite in production. Configure PRODUCTS_DATABASE_URL (or DATABASE_URL) to use managed Postgres."
+  );
+}
+
+function resolveProductsDbProvider(): DbProvider {
+  const configured = process.env.PRODUCTS_DB_PROVIDER?.trim().toLowerCase();
+  if (configured === "postgres" || configured === "sqlite") {
+    return configured;
   }
 
-  database = new DatabaseSync(PRODUCTS_DB_PATH);
-  return database;
+  return PRODUCTS_DATABASE_URL ? "postgres" : "sqlite";
+}
+
+function resolveProductsDatabaseUrl() {
+  const primary = process.env.PRODUCTS_DATABASE_URL?.trim();
+  if (primary) {
+    return primary;
+  }
+
+  return process.env.DATABASE_URL?.trim() ?? "";
+}
+
+function resolveSqliteDbPath() {
+  const configured = process.env.PRODUCTS_DB_PATH?.trim();
+  if (!configured) {
+    return DEFAULT_SQLITE_DB_PATH;
+  }
+
+  return path.isAbsolute(configured)
+    ? configured
+    : path.join(process.cwd(), configured);
+}
+
+function loadSqliteCtor() {
+  if (sqliteCtor) {
+    return sqliteCtor;
+  }
+
+  const require = createRequire(import.meta.url);
+  const sqliteModule = require("node:sqlite") as { DatabaseSync: SqliteDatabaseCtor };
+  sqliteCtor = sqliteModule.DatabaseSync;
+  return sqliteCtor;
+}
+
+function getSqliteDatabase() {
+  if (sqliteDatabase) {
+    return sqliteDatabase;
+  }
+
+  const DatabaseSync = loadSqliteCtor();
+  sqliteDatabase = new DatabaseSync(SQLITE_DB_PATH);
+  return sqliteDatabase;
+}
+
+function resolvePostgresSslConfig() {
+  const configured = process.env.PRODUCTS_DB_SSL?.trim().toLowerCase();
+  const mode = configured ?? (process.env.NODE_ENV === "production" ? "require" : "disable");
+
+  if (mode === "disable") {
+    return false;
+  }
+
+  return {
+    rejectUnauthorized: process.env.PRODUCTS_DB_SSL_REJECT_UNAUTHORIZED !== "false"
+  };
+}
+
+function resolvePostgresPool() {
+  if (!PRODUCTS_DATABASE_URL) {
+    throw new Error(
+      "Missing PRODUCTS_DATABASE_URL or DATABASE_URL for Postgres product storage."
+    );
+  }
+
+  const maxConnections = Number(process.env.PRODUCTS_DB_MAX_CONNECTIONS ?? "10");
+  const poolConfig: PoolConfig = {
+    connectionString: PRODUCTS_DATABASE_URL,
+    ssl: resolvePostgresSslConfig(),
+    max:
+      Number.isFinite(maxConnections) && maxConnections > 0
+        ? Math.trunc(maxConnections)
+        : 10
+  };
+
+  type GlobalWithPool = typeof globalThis & { __club47ProductsPool?: Pool };
+  const globalForPool = globalThis as GlobalWithPool;
+
+  if (!globalForPool.__club47ProductsPool) {
+    globalForPool.__club47ProductsPool = new Pool(poolConfig);
+  }
+
+  return globalForPool.__club47ProductsPool;
+}
+
+function safeJsonParse(raw: string): unknown {
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    return null;
+  }
 }
 
 function normalizeStatus(status: unknown): ProductStatus {
@@ -73,6 +172,10 @@ function normalizeStatus(status: unknown): ProductStatus {
 }
 
 function normalizeUpdatedAt(value: unknown) {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
   if (typeof value !== "string" || value.trim().length === 0) {
     return new Date().toISOString();
   }
@@ -86,14 +189,14 @@ function normalizeUpdatedAt(value: unknown) {
 }
 
 function parseDetails(raw: unknown): string[] {
-  if (Array.isArray(raw)) {
-    return raw
-      .filter((item): item is string => typeof item === "string")
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
+  if (!Array.isArray(raw)) {
+    return [];
   }
 
-  return [];
+  return raw
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
 }
 
 function parseOptions(raw: unknown): ProductOption[] {
@@ -114,32 +217,6 @@ function parseOptions(raw: unknown): ProductOption[] {
     );
 }
 
-function safeJsonParse(raw: string): unknown {
-  try {
-    return JSON.parse(raw) as unknown;
-  } catch {
-    return null;
-  }
-}
-
-function rowToProduct(row: ProductRow): Product {
-  const parsedDetails = parseDetails(safeJsonParse(row.details_json));
-  const parsedOptions = parseOptions(safeJsonParse(row.options_json));
-
-  return {
-    id: row.id,
-    section: row.section,
-    name: row.name,
-    details: parsedDetails,
-    options: parsedOptions,
-    imageSrc: row.image_src ?? undefined,
-    imageAlt: row.image_alt ?? undefined,
-    stock: Number.isFinite(Number(row.stock)) ? Number(row.stock) : 0,
-    status: normalizeStatus(row.status),
-    updatedAt: normalizeUpdatedAt(row.updated_at)
-  };
-}
-
 function normalizeProduct(input: Product, index: number): Product {
   return {
     id: input.id,
@@ -155,26 +232,34 @@ function normalizeProduct(input: Product, index: number): Product {
   };
 }
 
-function createSchemaIfNeeded(db: SqliteDatabase) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS products (
-      id TEXT PRIMARY KEY,
-      section TEXT NOT NULL,
-      name TEXT NOT NULL,
-      details_json TEXT NOT NULL,
-      options_json TEXT NOT NULL,
-      image_src TEXT,
-      image_alt TEXT,
-      stock INTEGER NOT NULL DEFAULT 0,
-      status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'hidden')),
-      updated_at TEXT NOT NULL,
-      sort_order INTEGER NOT NULL DEFAULT 0
-    );
-  `);
+function sqliteRowToProduct(row: SqliteProductRow): Product {
+  return {
+    id: row.id,
+    section: row.section,
+    name: row.name,
+    details: parseDetails(safeJsonParse(row.details_json)),
+    options: parseOptions(safeJsonParse(row.options_json)),
+    imageSrc: row.image_src ?? undefined,
+    imageAlt: row.image_alt ?? undefined,
+    stock: Number.isFinite(Number(row.stock)) ? Number(row.stock) : 0,
+    status: normalizeStatus(row.status),
+    updatedAt: normalizeUpdatedAt(row.updated_at)
+  };
+}
 
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_products_sort_order ON products(sort_order ASC);"
-  );
+function postgresRowToProduct(row: PostgresProductRow): Product {
+  return {
+    id: row.id,
+    section: row.section,
+    name: row.name,
+    details: parseDetails(row.details_json),
+    options: parseOptions(row.options_json),
+    imageSrc: row.image_src ?? undefined,
+    imageAlt: row.image_alt ?? undefined,
+    stock: Number.isFinite(Number(row.stock)) ? Number(row.stock) : 0,
+    status: normalizeStatus(row.status),
+    updatedAt: normalizeUpdatedAt(row.updated_at)
+  };
 }
 
 async function readLegacyProductsFile(): Promise<Product[]> {
@@ -200,8 +285,55 @@ async function readLegacyProductsFile(): Promise<Product[]> {
   }
 }
 
-function replaceAllProducts(db: SqliteDatabase, products: Product[]) {
-  const removeAllStmt = "DELETE FROM products;";
+async function readProductsFromExistingSqliteFile(): Promise<Product[]> {
+  try {
+    await fs.access(SQLITE_DB_PATH);
+  } catch {
+    return [];
+  }
+
+  const DatabaseSync = loadSqliteCtor();
+  const db = new DatabaseSync(SQLITE_DB_PATH);
+
+  try {
+    const tableExists = db.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='products' LIMIT 1;"
+    ).get() as { name?: string } | undefined;
+
+    if (!tableExists?.name) {
+      return [];
+    }
+
+    const rows = db
+      .prepare(
+        `
+        SELECT
+          id,
+          section,
+          name,
+          details_json,
+          options_json,
+          image_src,
+          image_alt,
+          stock,
+          status,
+          updated_at,
+          sort_order
+        FROM products
+        ORDER BY sort_order ASC, updated_at DESC;
+        `
+      )
+      .all() as SqliteProductRow[];
+
+    return rows.map(sqliteRowToProduct);
+  } catch {
+    return [];
+  } finally {
+    db.close?.();
+  }
+}
+
+function replaceAllProductsInSqlite(db: SqliteDatabase, products: Product[]) {
   const insertStmt = db.prepare(`
     INSERT INTO products (
       id,
@@ -220,7 +352,7 @@ function replaceAllProducts(db: SqliteDatabase, products: Product[]) {
   `);
 
   const transaction = db.transaction((nextProducts: Product[]) => {
-    db.exec(removeAllStmt);
+    db.exec("DELETE FROM products;");
 
     nextProducts.forEach((product, index) => {
       const normalized = normalizeProduct(product, index);
@@ -243,50 +375,65 @@ function replaceAllProducts(db: SqliteDatabase, products: Product[]) {
   transaction(products);
 }
 
-async function seedDatabaseFromLegacyJsonIfEmpty(db: SqliteDatabase) {
-  const countRow = db.prepare("SELECT COUNT(*) AS total FROM products;").get() as
-    | { total?: number | string | bigint }
-    | undefined;
+function createSqliteSchemaIfNeeded(db: SqliteDatabase) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS products (
+      id TEXT PRIMARY KEY,
+      section TEXT NOT NULL,
+      name TEXT NOT NULL,
+      details_json TEXT NOT NULL,
+      options_json TEXT NOT NULL,
+      image_src TEXT,
+      image_alt TEXT,
+      stock INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'hidden')),
+      updated_at TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0
+    );
+  `);
 
-  const currentCount = Number(countRow?.total ?? 0);
-  if (currentCount > 0) {
-    return;
-  }
-
-  const legacyProducts = await readLegacyProductsFile();
-  if (legacyProducts.length === 0) {
-    return;
-  }
-
-  replaceAllProducts(db, legacyProducts);
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_products_sort_order ON products(sort_order ASC);"
+  );
 }
 
-async function initializeDatabaseIfNeeded() {
-  if (initializationPromise) {
-    return initializationPromise;
+async function initializeSqliteIfNeeded() {
+  if (sqliteInitializationPromise) {
+    return sqliteInitializationPromise;
   }
 
-  initializationPromise = (async () => {
-    await fs.mkdir(path.dirname(PRODUCTS_DB_PATH), { recursive: true });
+  sqliteInitializationPromise = (async () => {
+    await fs.mkdir(path.dirname(SQLITE_DB_PATH), { recursive: true });
 
-    const db = getDatabase();
-    createSchemaIfNeeded(db);
-    await seedDatabaseFromLegacyJsonIfEmpty(db);
+    const db = getSqliteDatabase();
+    createSqliteSchemaIfNeeded(db);
+
+    const countRow = db.prepare("SELECT COUNT(*) AS total FROM products;").get() as
+      | { total?: number | string | bigint }
+      | undefined;
+
+    if (Number(countRow?.total ?? 0) > 0) {
+      return;
+    }
+
+    const legacyProducts = await readLegacyProductsFile();
+    if (legacyProducts.length > 0) {
+      replaceAllProductsInSqlite(db, legacyProducts);
+    }
   })();
 
   try {
-    await initializationPromise;
+    await sqliteInitializationPromise;
   } catch (error) {
-    initializationPromise = null;
+    sqliteInitializationPromise = null;
     throw error;
   }
 }
 
-export async function readProducts(): Promise<Product[]> {
-  await initializeDatabaseIfNeeded();
+async function readProductsFromSqlite() {
+  await initializeSqliteIfNeeded();
 
-  const db = getDatabase();
-  const rows = db
+  const rows = getSqliteDatabase()
     .prepare(
       `
       SELECT
@@ -305,12 +452,186 @@ export async function readProducts(): Promise<Product[]> {
       ORDER BY sort_order ASC, updated_at DESC;
       `
     )
-    .all() as ProductRow[];
+    .all() as SqliteProductRow[];
 
-  return rows.map(rowToProduct);
+  return rows.map(sqliteRowToProduct);
+}
+
+async function writeProductsToSqlite(products: Product[]) {
+  await initializeSqliteIfNeeded();
+  replaceAllProductsInSqlite(getSqliteDatabase(), products);
+}
+
+async function createPostgresSchemaIfNeeded(pool: Pool) {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS products (
+      id TEXT PRIMARY KEY,
+      section TEXT NOT NULL,
+      name TEXT NOT NULL,
+      details_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+      options_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+      image_src TEXT,
+      image_alt TEXT,
+      stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+      status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'hidden')),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      sort_order INTEGER NOT NULL DEFAULT 0
+    );
+  `);
+
+  await pool.query(
+    "CREATE INDEX IF NOT EXISTS idx_products_sort_order ON products(sort_order ASC);"
+  );
+}
+
+async function replaceAllProductsInPostgres(pool: Pool, products: Product[]) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM products;");
+
+    for (let index = 0; index < products.length; index += 1) {
+      const normalized = normalizeProduct(products[index] as Product, index);
+
+      await client.query(
+        `
+        INSERT INTO products (
+          id,
+          section,
+          name,
+          details_json,
+          options_json,
+          image_src,
+          image_alt,
+          stock,
+          status,
+          updated_at,
+          sort_order
+        )
+        VALUES (
+          $1,
+          $2,
+          $3,
+          $4::jsonb,
+          $5::jsonb,
+          $6,
+          $7,
+          $8,
+          $9,
+          $10::timestamptz,
+          $11
+        );
+        `,
+        [
+          normalized.id,
+          normalized.section,
+          normalized.name,
+          JSON.stringify(normalized.details),
+          JSON.stringify(normalized.options),
+          normalized.imageSrc ?? null,
+          normalized.imageAlt ?? null,
+          normalized.stock,
+          normalized.status,
+          normalized.updatedAt,
+          index
+        ]
+      );
+    }
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function seedPostgresIfEmpty(pool: Pool) {
+  const countResult = await pool.query<{ total: number }>(
+    "SELECT COUNT(*)::int AS total FROM products;"
+  );
+
+  if ((countResult.rows[0]?.total ?? 0) > 0) {
+    return;
+  }
+
+  const sqliteProducts = await readProductsFromExistingSqliteFile();
+  if (sqliteProducts.length > 0) {
+    await replaceAllProductsInPostgres(pool, sqliteProducts);
+    return;
+  }
+
+  const legacyProducts = await readLegacyProductsFile();
+  if (legacyProducts.length > 0) {
+    await replaceAllProductsInPostgres(pool, legacyProducts);
+  }
+}
+
+async function initializePostgresIfNeeded() {
+  if (postgresInitializationPromise) {
+    return postgresInitializationPromise;
+  }
+
+  postgresInitializationPromise = (async () => {
+    const pool = resolvePostgresPool();
+    await createPostgresSchemaIfNeeded(pool);
+    await seedPostgresIfEmpty(pool);
+  })();
+
+  try {
+    await postgresInitializationPromise;
+  } catch (error) {
+    postgresInitializationPromise = null;
+    throw error;
+  }
+}
+
+async function readProductsFromPostgres() {
+  await initializePostgresIfNeeded();
+
+  const pool = resolvePostgresPool();
+  const result = await pool.query<PostgresProductRow>(
+    `
+    SELECT
+      id,
+      section,
+      name,
+      details_json,
+      options_json,
+      image_src,
+      image_alt,
+      stock,
+      status,
+      updated_at
+    FROM products
+    ORDER BY sort_order ASC, updated_at DESC;
+    `
+  );
+
+  return result.rows.map(postgresRowToProduct);
+}
+
+async function writeProductsToPostgres(products: Product[]) {
+  await initializePostgresIfNeeded();
+  await replaceAllProductsInPostgres(resolvePostgresPool(), products);
+}
+
+export async function readProducts(): Promise<Product[]> {
+  if (PRODUCTS_DB_PROVIDER === "postgres") {
+    return readProductsFromPostgres();
+  }
+
+  return readProductsFromSqlite();
 }
 
 export async function writeProducts(products: Product[]) {
-  await initializeDatabaseIfNeeded();
-  replaceAllProducts(getDatabase(), products);
+  if (PRODUCTS_DB_PROVIDER === "postgres") {
+    await writeProductsToPostgres(products);
+    return;
+  }
+
+  await writeProductsToSqlite(products);
 }
+
