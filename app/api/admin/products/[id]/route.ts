@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE_NAME, resolveAuthMode } from "@/lib/auth";
 import { readProducts, writeProducts } from "@/lib/products/storage";
+import { ensureTrustedMutationOrigin } from "@/lib/security/requestOrigin";
 import { Product } from "@/lib/products/types";
 import { productUpdateSchema } from "@/lib/validation/products";
 
@@ -63,6 +64,11 @@ export async function PATCH(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const originRejection = ensureTrustedMutationOrigin(request);
+  if (originRejection) {
+    return originRejection;
+  }
+
   const id = params.id;
   const body = (await request.json().catch(() => null)) as unknown;
 
@@ -99,6 +105,11 @@ export async function DELETE(
 ) {
   if (!(await isAdminRequest(request))) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const originRejection = ensureTrustedMutationOrigin(request);
+  if (originRejection) {
+    return originRejection;
   }
 
   const id = params.id;

@@ -17,6 +17,7 @@ import {
   getLoginRateLimitKey,
   registerFailedLoginAttempt
 } from "@/lib/security/loginRateLimit";
+import { ensureTrustedMutationOrigin } from "@/lib/security/requestOrigin";
 import { loginSchema } from "@/lib/validation/auth";
 
 export const runtime = "nodejs";
@@ -41,6 +42,11 @@ async function applyDelay(delayMs: number) {
 }
 
 export async function POST(request: NextRequest) {
+  const originRejection = ensureTrustedMutationOrigin(request);
+  if (originRejection) {
+    return originRejection;
+  }
+
   const rateLimitKey = `${getLoginRateLimitKey(request)}:admin`;
   const blockedState = getLoginBlockState(rateLimitKey);
   if (blockedState.blocked) {

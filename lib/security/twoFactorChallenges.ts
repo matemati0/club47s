@@ -8,6 +8,7 @@ type TwoFactorChallengeRecord = {
   email: string;
   targetMode: TwoFactorTargetMode;
   codeHash: Buffer;
+  registrationPasswordHash?: string;
   expiresAt: number;
 };
 
@@ -33,6 +34,7 @@ export function createTwoFactorChallenge(input: {
   email: string;
   targetMode: TwoFactorTargetMode;
   code: string;
+  registrationPasswordHash?: string;
   expiresAt: number;
 }) {
   cleanupExpiredChallenges();
@@ -43,6 +45,7 @@ export function createTwoFactorChallenge(input: {
     email: input.email.trim().toLowerCase(),
     targetMode: input.targetMode,
     codeHash: hashCode(input.code),
+    registrationPasswordHash: input.registrationPasswordHash,
     expiresAt: input.expiresAt
   });
 
@@ -69,7 +72,12 @@ export function getTwoFactorChallengeMeta(id: string) {
 }
 
 export type VerifyTwoFactorChallengeResult =
-  | { ok: true; email: string; targetMode: TwoFactorTargetMode }
+  | {
+      ok: true;
+      email: string;
+      targetMode: TwoFactorTargetMode;
+      registrationPasswordHash?: string;
+    }
   | { ok: false; reason: "missing" | "expired" | "invalid_code" };
 
 export function verifyAndConsumeTwoFactorChallenge(
@@ -98,10 +106,14 @@ export function verifyAndConsumeTwoFactorChallenge(
   }
 
   challenges.delete(id);
-  return { ok: true, email: challenge.email, targetMode: challenge.targetMode };
+  return {
+    ok: true,
+    email: challenge.email,
+    targetMode: challenge.targetMode,
+    registrationPasswordHash: challenge.registrationPasswordHash
+  };
 }
 
 export function clearTwoFactorChallenge(id: string) {
   challenges.delete(id);
 }
-

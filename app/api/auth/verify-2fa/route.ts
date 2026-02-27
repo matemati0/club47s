@@ -5,6 +5,7 @@ import {
   createAuthToken,
   getAuthCookieOptions
 } from "@/lib/auth";
+import { upsertMemberAccountWithPasswordHash } from "@/lib/auth/memberAccounts";
 import {
   getTwoFactorChallengeMeta,
   verifyAndConsumeTwoFactorChallenge
@@ -15,6 +16,7 @@ import {
   registerFailedLoginAttempt,
   clearFailedLoginAttempts
 } from "@/lib/security/loginRateLimit";
+import { ensureTrustedMutationOrigin } from "@/lib/security/requestOrigin";
 import { twoFactorVerifySchema } from "@/lib/validation/auth";
 
 export const runtime = "nodejs";
@@ -47,6 +49,11 @@ function getTwoFactorRateLimitKey(request: NextRequest, emailHint?: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const originRejection = ensureTrustedMutationOrigin(request);
+  if (originRejection) {
+    return originRejection;
+  }
+
   const challengeId = request.cookies.get(TWO_FACTOR_COOKIE_NAME)?.value;
   const meta = challengeId ? getTwoFactorChallengeMeta(challengeId) : null;
   const rateLimitKey = getTwoFactorRateLimitKey(request, meta?.email);
@@ -117,6 +124,17 @@ export async function POST(request: NextRequest) {
 
   clearFailedLoginAttempts(rateLimitKey);
   const resolvedMode = verification.targetMode === "admin" ? "admin" : "member";
+
+  if (
+    verification.targetMode === "member" &&
+    typeof verification.registrationPasswordHash === "string"
+  ) {
+    await upsertMemberAccountWithPasswordHash(
+      verification.email,
+      verification.registrationPasswordHash
+    );
+  }
+
   const token = await createAuthToken(resolvedMode);
 
   const response = NextResponse.json({ mode: resolvedMode });

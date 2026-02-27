@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   AUTH_COOKIE_NAME,
-  REGISTERED_MEMBER_COOKIE_NAME,
   TWO_FACTOR_COOKIE_MAX_AGE,
   TWO_FACTOR_COOKIE_NAME,
   generateTwoFactorCode,
-  getRegisteredMemberCookieOptions,
   getTwoFactorCookieOptions,
   maskEmail,
-  serializeRegisteredMemberCredentials,
   shouldExposeDebugTwoFactorCode
 } from "@/lib/auth";
+import { hashMemberPasswordForStorage } from "@/lib/auth/memberAccounts";
 import { sendTwoFactorCodeEmail } from "@/lib/notifications/twoFactorEmail";
+import { ensureTrustedMutationOrigin } from "@/lib/security/requestOrigin";
 import { createTwoFactorChallenge } from "@/lib/security/twoFactorChallenges";
 import { registerSchema } from "@/lib/validation/auth";
 
@@ -19,6 +18,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
+  const originRejection = ensureTrustedMutationOrigin(request);
+  if (originRejection) {
+    return originRejection;
+  }
+
   const body = (await request.json().catch(() => null)) as
     | { email?: string; password?: string; confirmPassword?: string }
     | null;
@@ -39,10 +43,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const encodedCredentials = serializeRegisteredMemberCredentials(
-    parsed.data.email,
-    parsed.data.password
-  );
+  const registrationPasswordHash = await hashMemberPasswordForStorage(parsed.data.password);
 
   const code = generateTwoFactorCode();
   const expiresAt = Date.now() + TWO_FACTOR_COOKIE_MAX_AGE * 1000;
@@ -66,13 +67,13 @@ export async function POST(request: NextRequest) {
     );
     response.cookies.set(TWO_FACTOR_COOKIE_NAME, "", { path: "/", maxAge: 0 });
     response.cookies.set(AUTH_COOKIE_NAME, "", { path: "/", maxAge: 0 });
-    response.cookies.set(REGISTERED_MEMBER_COOKIE_NAME, "", { path: "/", maxAge: 0 });
     return response;
   }
 
   const challenge = createTwoFactorChallenge({
     email: parsed.data.email,
     code,
+    registrationPasswordHash,
     expiresAt,
     targetMode: "member"
   });
@@ -87,11 +88,6 @@ export async function POST(request: NextRequest) {
         : `שליחת המייל לא זמינה כרגע. נסה שוב בעוד מספר דקות.${emailFailureReasonSuffix}`,
     debugCode
   });
-  response.cookies.set(
-    REGISTERED_MEMBER_COOKIE_NAME,
-    encodedCredentials,
-    getRegisteredMemberCookieOptions()
-  );
   response.cookies.set(TWO_FACTOR_COOKIE_NAME, challenge.id, getTwoFactorCookieOptions());
   response.cookies.set(AUTH_COOKIE_NAME, "", { path: "/", maxAge: 0 });
 

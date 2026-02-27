@@ -16,6 +16,7 @@ import {
   isSocialProviderConfigured,
   sanitizeReturnTo
 } from "@/lib/security/socialOAuth";
+import { ensureTrustedMutationOrigin } from "@/lib/security/requestOrigin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,6 +41,11 @@ async function buildDevelopmentFallbackResponse(provider: SocialProvider) {
 }
 
 export async function POST(request: NextRequest) {
+  const originRejection = ensureTrustedMutationOrigin(request);
+  if (originRejection) {
+    return originRejection;
+  }
+
   const body = (await request.json().catch(() => null)) as SocialLoginBody | null;
   const parsed = socialLoginSchema.safeParse(body);
 

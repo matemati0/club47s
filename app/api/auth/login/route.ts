@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   AUTH_COOKIE_NAME,
-  REGISTERED_MEMBER_COOKIE_NAME,
   TWO_FACTOR_COOKIE_MAX_AGE,
   TWO_FACTOR_COOKIE_NAME,
   generateTwoFactorCode,
   getTwoFactorCookieOptions,
-  isValidMemberCredentials,
   maskEmail,
-  parseRegisteredMemberCredentials,
   shouldExposeDebugTwoFactorCode
 } from "@/lib/auth";
+import { isValidMemberCredentialsAgainstStore } from "@/lib/auth/memberAccounts";
 import { sendTwoFactorCodeEmail } from "@/lib/notifications/twoFactorEmail";
 import { createTwoFactorChallenge } from "@/lib/security/twoFactorChallenges";
 import {
@@ -19,6 +17,7 @@ import {
   getLoginRateLimitKey,
   registerFailedLoginAttempt
 } from "@/lib/security/loginRateLimit";
+import { ensureTrustedMutationOrigin } from "@/lib/security/requestOrigin";
 import { loginSchema } from "@/lib/validation/auth";
 
 export const runtime = "nodejs";
@@ -43,6 +42,11 @@ async function applyDelay(delayMs: number) {
 }
 
 export async function POST(request: NextRequest) {
+  const originRejection = ensureTrustedMutationOrigin(request);
+  if (originRejection) {
+    return originRejection;
+  }
+
   const rateLimitKey = getLoginRateLimitKey(request);
   const blockedState = getLoginBlockState(rateLimitKey);
   if (blockedState.blocked) {
@@ -76,17 +80,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const registeredCredentials = parseRegisteredMemberCredentials(
-    request.cookies.get(REGISTERED_MEMBER_COOKIE_NAME)?.value
+  const memberCredentialsValid = await isValidMemberCredentialsAgainstStore(
+    parsed.data.email,
+    parsed.data.password
   );
 
-  if (
-    !isValidMemberCredentials(
-      parsed.data.email,
-      parsed.data.password,
-      registeredCredentials
-    )
-  ) {
+  if (!memberCredentialsValid) {
     const failureState = registerFailedLoginAttempt(rateLimitKey);
     await applyDelay(failureState.delayMs);
 

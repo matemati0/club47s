@@ -4,20 +4,12 @@ export type AuthMode = "guest" | "anonymous" | "member" | "admin";
 export type SocialProvider = "google";
 export type TwoFactorTargetMode = "member" | "admin";
 
-export type RegisteredMemberCredentials = {
-  email: string;
-  password: string;
-};
-
 export const AUTH_COOKIE_NAME = "club-auth-mode";
-export const REGISTERED_MEMBER_COOKIE_NAME = "club-member-profile";
 export const TWO_FACTOR_COOKIE_NAME = "club-two-factor";
 export const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 export const TWO_FACTOR_COOKIE_MAX_AGE = 60 * 10;
-export const DEFAULT_MEMBER_EMAIL = "member@club47.co.il";
-export const DEFAULT_MEMBER_PASSWORD = "club47";
-export const DEFAULT_ADMIN_EMAIL = "admin@club47.co.il";
-export const DEFAULT_ADMIN_PASSWORD = "admin47";
+
+let didWarnMissingAdminCredentials = false;
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
@@ -104,16 +96,6 @@ export function getAuthCookieOptions() {
   };
 }
 
-export function getRegisteredMemberCookieOptions() {
-  return {
-    httpOnly: true,
-    sameSite: "strict" as const,
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: AUTH_COOKIE_MAX_AGE
-  };
-}
-
 export function getTwoFactorCookieOptions() {
   return {
     httpOnly: true,
@@ -126,44 +108,6 @@ export function getTwoFactorCookieOptions() {
 
 export function shouldExposeDebugTwoFactorCode() {
   return process.env.ALLOW_DEBUG_2FA === "true";
-}
-
-export function serializeRegisteredMemberCredentials(
-  email: string,
-  password: string
-) {
-  const payload = JSON.stringify({
-    email: normalizeEmail(email),
-    password
-  });
-
-  return encodeURIComponent(payload);
-}
-
-export function parseRegisteredMemberCredentials(
-  value?: string | null
-): RegisteredMemberCredentials | null {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const decoded = decodeURIComponent(value);
-    const parsed = JSON.parse(decoded) as
-      | { email?: string; password?: string }
-      | null;
-
-    if (!parsed?.email || !parsed?.password) {
-      return null;
-    }
-
-    return {
-      email: normalizeEmail(parsed.email),
-      password: parsed.password
-    };
-  } catch {
-    return null;
-  }
 }
 
 export function generateTwoFactorCode() {
@@ -200,43 +144,19 @@ export function isSupportedSocialProvider(value: string): value is SocialProvide
   return value === "google";
 }
 
-export function isValidMockMemberCredentials(email: string, password: string) {
-  const configuredEmail =
-    process.env.CLUB_MEMBER_EMAIL?.trim().toLowerCase() ?? DEFAULT_MEMBER_EMAIL;
-  const configuredPassword =
-    process.env.CLUB_MEMBER_PASSWORD ?? DEFAULT_MEMBER_PASSWORD;
-
-  return normalizeEmail(email) === configuredEmail && password === configuredPassword;
-}
-
 export function isValidAdminCredentials(email: string, password: string) {
-  const configuredEmail =
-    process.env.CLUB_ADMIN_EMAIL?.trim().toLowerCase() ?? DEFAULT_ADMIN_EMAIL;
-  const configuredPassword =
-    process.env.CLUB_ADMIN_PASSWORD ?? DEFAULT_ADMIN_PASSWORD;
+  const configuredEmail = process.env.CLUB_ADMIN_EMAIL?.trim().toLowerCase();
+  const configuredPassword = process.env.CLUB_ADMIN_PASSWORD;
 
-  return normalizeEmail(email) === configuredEmail && password === configuredPassword;
-}
-
-export function isValidRegisteredMemberCredentials(
-  email: string,
-  password: string,
-  credentials: RegisteredMemberCredentials | null
-) {
-  if (!credentials) {
+  if (!configuredEmail || !configuredPassword) {
+    if (!didWarnMissingAdminCredentials) {
+      console.warn(
+        "[auth] Missing CLUB_ADMIN_EMAIL or CLUB_ADMIN_PASSWORD. Admin login is disabled until credentials are configured."
+      );
+      didWarnMissingAdminCredentials = true;
+    }
     return false;
   }
 
-  return normalizeEmail(email) === credentials.email && password === credentials.password;
-}
-
-export function isValidMemberCredentials(
-  email: string,
-  password: string,
-  registeredCredentials: RegisteredMemberCredentials | null
-) {
-  return (
-    isValidMockMemberCredentials(email, password) ||
-    isValidRegisteredMemberCredentials(email, password, registeredCredentials)
-  );
+  return normalizeEmail(email) === configuredEmail && password === configuredPassword;
 }

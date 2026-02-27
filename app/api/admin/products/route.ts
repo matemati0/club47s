@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE_NAME, resolveAuthMode } from "@/lib/auth";
 import { readProducts, writeProducts } from "@/lib/products/storage";
+import { ensureTrustedMutationOrigin } from "@/lib/security/requestOrigin";
 import { Product } from "@/lib/products/types";
 import { productCreateSchema } from "@/lib/validation/products";
 
@@ -37,6 +38,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   if (!(await isAdminRequest(request))) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const originRejection = ensureTrustedMutationOrigin(request);
+  if (originRejection) {
+    return originRejection;
   }
 
   const body = (await request.json().catch(() => null)) as unknown;
