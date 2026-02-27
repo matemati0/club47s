@@ -276,14 +276,18 @@
   .landing-hero-bg-layer {
     position: absolute;
     inset: 0;
-    background-size: cover;
-    background-position: center;
     opacity: 0;
     transform: scale(1.02);
     transition:
       opacity 850ms ease,
       transform 5500ms ease;
     will-change: opacity, transform;
+    overflow: hidden;
+  }
+
+  .landing-hero-bg-image {
+    object-fit: cover;
+    object-position: center;
   }
 
   .landing-hero-bg-layer[data-active="true"] {

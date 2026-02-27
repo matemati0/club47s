@@ -165,8 +165,16 @@ export function PublicLanding() {
             key={backgroundSrc}
             data-active={index === activeBackgroundIndex}
             className="landing-hero-bg-layer"
-            style={{ backgroundImage: `url(${backgroundSrc})` }}
-          />
+          >
+            <Image
+              src={backgroundSrc}
+              alt=""
+              fill
+              priority={index === 0}
+              sizes="100vw"
+              className="landing-hero-bg-image"
+            />
+          </div>
         ))}
         <div className="landing-hero-bg-mask" />
       </div>
