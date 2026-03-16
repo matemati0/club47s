@@ -14,12 +14,9 @@ type SqliteStatement = {
   run: (...params: unknown[]) => unknown;
 };
 
-type SqliteTransactionFactory = <T extends (...args: any[]) => unknown>(fn: T) => T;
-
 type SqliteDatabase = {
   exec: (sql: string) => void;
   prepare: (sql: string) => SqliteStatement;
-  transaction: SqliteTransactionFactory;
   close?: () => void;
 };
 
@@ -351,10 +348,12 @@ function replaceAllProductsInSqlite(db: SqliteDatabase, products: Product[]) {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
   `);
 
-  const transaction = db.transaction((nextProducts: Product[]) => {
+  db.exec("BEGIN IMMEDIATE;");
+
+  try {
     db.exec("DELETE FROM products;");
 
-    nextProducts.forEach((product, index) => {
+    products.forEach((product, index) => {
       const normalized = normalizeProduct(product, index);
       insertStmt.run(
         normalized.id,
@@ -370,9 +369,12 @@ function replaceAllProductsInSqlite(db: SqliteDatabase, products: Product[]) {
         index
       );
     });
-  });
 
-  transaction(products);
+    db.exec("COMMIT;");
+  } catch (error) {
+    db.exec("ROLLBACK;");
+    throw error;
+  }
 }
 
 function createSqliteSchemaIfNeeded(db: SqliteDatabase) {
@@ -634,4 +636,3 @@ export async function writeProducts(products: Product[]) {
 
   await writeProductsToSqlite(products);
 }
-
